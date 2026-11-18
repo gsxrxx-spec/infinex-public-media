@@ -1,0 +1,47 @@
+name: INFINEX - carrusel diario Instagram
+
+on:
+  schedule:
+    - cron: '30 9 * * *'
+      timezone: 'Europe/Madrid'
+    - cron: '45 9 * * *'
+      timezone: 'Europe/Madrid'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Comprobación sin publicar, publicar hoy o verificar hoy'
+        required: true
+        default: dry_run
+        type: choice
+        options:
+          - dry_run
+          - publish
+          - verify
+
+permissions:
+  contents: write
+
+concurrency:
+  group: infinex-instagram-diario
+  cancel-in-progress: false
+
+jobs:
+  instagram:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || (github.event.schedule == '45 9 * * *' && 'verify' || 'publish') }}
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencia grafica
+        run: python -m pip install 'Pillow>=11.0,<13'
+      - name: Comprobar y ejecutar INFINEX
+        run: python scripts/infinex_daily.py "$MODE"
