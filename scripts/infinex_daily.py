@@ -11,7 +11,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, date
+from datetime import datetime, date, time as dtime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -31,11 +31,16 @@ WHITE = (245,246,248)
 GRAY = (178,181,185)
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-# Date override is possible exclusively in a NON-publishing dry_run.
+# Only the internal recovery process uses INFINEX_BACKFILL_DATE for publishing.
 IS_DRY_RUN = len(sys.argv)>1 and sys.argv[1]=="dry_run"
+TODAY = datetime.now(TZ).date()
 DATE = (date.fromisoformat(os.environ["INFINEX_DRYRUN_DATE"])
         if IS_DRY_RUN and os.getenv("INFINEX_DRYRUN_DATE")
-        else datetime.now(TZ).date())
+        else date.fromisoformat(os.environ["INFINEX_BACKFILL_DATE"])
+        if not IS_DRY_RUN and os.getenv("INFINEX_BACKFILL_DATE")
+        else TODAY)
+if not IS_DRY_RUN and sys.argv[1:2]!=["recover"] and (DATE>TODAY or DATE<date(2026,11,19) or (TODAY-DATE).days>30):
+    raise RuntimeError("PUBLICATION_DATE_OUTSIDE_RECOVERY_WINDOW")
 DAY_KEY = DATE.isoformat()
 SLOT = os.getenv("INFINEX_SLOT","09")
 if SLOT not in ("09","17"):
@@ -177,6 +182,38 @@ def build():
     (MEDIA_DIR/"sources.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     return chosen,manifest
 
+def review_before_publish(chosen,manifest,caption):
+    """Automated preflight: correct brand, approved text, unique licensed photos and dimensions."""
+    expected_groups={"welding","gates","structures"}
+    if len(chosen)!=3 or {g for g,p in chosen}!=expected_groups:
+        raise RuntimeError("CONTENT_CATEGORIES_NOT_APPROVED")
+    if len({str(p["id"]) for g,p in chosen})!=3:
+        raise RuntimeError("CONTENT_REPEATED_PHOTO")
+    if (len(manifest.get("images",[]))!=3 or len(manifest.get("sources",[]))!=3 or
+        manifest.get("license")!="https://www.pexels.com/license/" or
+        manifest.get("not_actual_infinex_works") is not True):
+        raise RuntimeError("CONTENT_LICENSE_OR_MANIFEST_INVALID")
+    if (caption!=caption_for(chosen) or
+        "No son obras ejecutadas por INFINEX." not in caption or
+        "#INFINEX" not in caption):
+        raise RuntimeError("CONTENT_CAPTION_INVALID")
+    if hashlib.sha256(LOGO.read_bytes()).hexdigest()!=LOGO_SHA256:
+        raise RuntimeError("CONTENT_CORPORATE_LOGO_INVALID")
+    for item,(_,photo) in zip(manifest["images"],chosen):
+        if item["path"].startswith("/") or ".." in Path(item["path"]).parts:
+            raise RuntimeError("CONTENT_IMAGE_UNSAFE_PATH")
+        f=BASE/item["path"]
+        if (not f.is_file() or f.stat().st_size<50000 or
+            hashlib.sha256(f.read_bytes()).hexdigest()!=item["sha256"]):
+            raise RuntimeError("CONTENT_IMAGE_INTEGRITY_FAILED")
+        with Image.open(f) as img:
+            if img.format!="JPEG" or img.size!=(1080,1350):
+                raise RuntimeError("CONTENT_IMAGE_DIMENSIONS_INVALID")
+        if not str(photo["page"]).startswith("https://www.pexels.com/photo/"):
+            raise RuntimeError("CONTENT_IMAGE_SOURCE_INVALID")
+    log("CONTENT_REVIEW_PASSED","date",DAY_KEY,"slot",SLOT,
+        "images",3,"logo","original","stock","illustrative")
+
 def token():
     t=os.getenv("INFINEX_IG_TOKEN","").strip()
     if len(t)<50:raise RuntimeError("META_SECRET_NOT_CONFIGURED")
@@ -244,7 +281,7 @@ def verify_post(media_id,expected_caption):
     return post
 
 def find_today(caption):
-    for item in api(IG_ID+"/media?fields=id,caption,media_type,permalink&limit=30").get("data",[]):
+    for item in api(IG_ID+"/media?fields=id,caption,media_type,permalink&limit=100").get("data",[]):
         if item.get("caption")==caption:
             return item
     return None
@@ -252,6 +289,7 @@ def find_today(caption):
 def dry_run():
     preflight()
     chosen,manifest=build()
+    review_before_publish(chosen,manifest,caption_for(chosen))
     log("DRY_RUN_OK","date",DAY_KEY,"slot",SLOT,"images",len(manifest["images"]))
     log("SAFETY","NO_POST","NO_COMMIT","TOKEN_NOT_PRINTED")
     for source in manifest["sources"]:log("LICENSED_SOURCE",source["page"])
@@ -260,18 +298,39 @@ def publish():
     preflight()
     chosen=photo_selection()
     expected_caption=caption_for(chosen)
-    if RECORD_FILE.exists():
-        state=json.loads(RECORD_FILE.read_text(encoding="utf-8"))
-        log("SKIPPED_EXISTING_RECORD",state.get("status","UNKNOWN"))
+    previous=(json.loads(RECORD_FILE.read_text(encoding="utf-8"))
+              if RECORD_FILE.exists() else None)
+    if previous and previous.get("status")=="PUBLISHED_VERIFIED":
+        log("SKIPPED_ALREADY_VERIFIED",DAY_KEY,SLOT,previous.get("permalink",""))
         return
+    # Reconcile from Instagram before any new publish, including after crashes.
     found=find_today(expected_caption)
     if found:
-        log("EXISTING_INSTAGRAM_CAPTION_FOUND_NO_REPOST")
-        raise RuntimeError("POST_EXISTS_WITHOUT_LOCAL_RECORD")
+        post=verify_post(found["id"],expected_caption)
+        state=previous or {"date":DAY_KEY,"slot":SLOT,"target":IG_USERNAME,
+                           "account_id":IG_ID,"caption":expected_caption}
+        state.update({"status":"PUBLISHED_VERIFIED","media_id":str(post["id"]),
+                      "permalink":post["permalink"],"timestamp":post.get("timestamp")})
+        atomic_record(state)
+        commit([str(RECORD_FILE.relative_to(BASE))],
+               "INFINEX reconciled IG post "+DAY_KEY+" "+SLOT)
+        log("RECONCILED_PUBLISHED_VERIFIED",post["permalink"])
+        return
+    if previous:
+        if (previous.get("publish_attempt_started") or previous.get("media_id") or
+            previous.get("status") in ("PUBLISHING_RESULT_UNCERTAIN_NO_RETRY",
+                                       "PUBLISH_SENT_NOT_VERIFIED")):
+            # An uncertain media_publish must NEVER be resent blindly.
+            log("BLOCKED_UNCERTAIN_POST_NO_DUPLICATE",DAY_KEY,SLOT)
+            raise RuntimeError("UNCONFIRMED_META_PUBLISH_NO_AUTOMATIC_RETRY")
+        log("RESUMING_SAFE_PRE_PUBLISH_FAILURE",DAY_KEY,SLOT)
     chosen,manifest=build()
+    review_before_publish(chosen,manifest,expected_caption)
     state={"date":DAY_KEY,"slot":SLOT,"target":IG_USERNAME,"account_id":IG_ID,
            "status":"CLAIMED_NO_RETRY","caption":expected_caption,
            "images":manifest["images"],"media_id":None,"children":[],"creation_id":None,
+           "publish_attempt_started":False,
+           "attempt_count":(previous or {}).get("attempt_count",0)+1,
            "source":"Pexels; illustrative photos, not INFINEX jobs"}
     atomic_record(state)
     commit([str(RECORD_FILE.relative_to(BASE)),str(MEDIA_DIR.relative_to(BASE))],
@@ -293,6 +352,7 @@ def publish():
         state["creation_id"]=str(parent["id"])
         atomic_record(state)
         if not status_code(state["creation_id"]):raise RuntimeError("META_PARENT_FAILED")
+        state["publish_attempt_started"]=True
         state["status"]="PUBLISHING_RESULT_UNCERTAIN_NO_RETRY"
         atomic_record(state)
         commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX publish attempt reserved "+DAY_KEY+" "+SLOT)
@@ -347,13 +407,75 @@ def verify():
     commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX review "+SLOT+":15 "+DAY_KEY)
     log("INDEPENDENT_REVIEW_VERIFIED",DAY_KEY,SLOT,post["permalink"])
 
+def run_recovery_task(mode,day,slot):
+    env=os.environ.copy()
+    env["INFINEX_BACKFILL_DATE"]=day.isoformat()
+    env["INFINEX_SLOT"]=slot
+    result=subprocess.run([sys.executable,str(Path(__file__).resolve()),mode],
+                          cwd=BASE,env=env,check=False,timeout=650)
+    log("RECOVERY_TASK",day.isoformat(),slot,mode,
+        "OK" if result.returncode==0 else "FAILED")
+    return result.returncode==0
+
+def recover():
+    """Recheck due slots every scheduled run; publish late when safe, never duplicate uncertain posts."""
+    now=datetime.now(TZ)
+    max_publications=2
+    max_reviews=4
+    attempted_publications=0
+    attempted_reviews=0
+    errors_today=[]
+    start_day=date(2026,11,19)
+    # Most recent first: today's two slots always have priority over the backlog.
+    for days_ago in range(31):
+        day=now.date()-timedelta(days=days_ago)
+        if day<start_day:
+            break
+        for slot in ("09","17"):
+            due=datetime.combine(day,dtime(int(slot),0),tzinfo=TZ)
+            if now<due:
+                continue
+            ledger=BASE/"records"/(day.isoformat()+"_"+slot+".json")
+            state=None
+            if ledger.is_file():
+                try:state=json.loads(ledger.read_text(encoding="utf-8"))
+                except Exception:
+                    log("RECOVERY_INVALID_LEDGER",day.isoformat(),slot)
+                    if day==now.date():errors_today.append(slot+"_invalid_ledger")
+                    continue
+            if state and state.get("status")=="PUBLISHED_VERIFIED":
+                if (now>=due+timedelta(minutes=15) and
+                    not state.get("reviewed_at") and attempted_reviews<max_reviews):
+                    attempted_reviews+=1
+                    if not run_recovery_task("verify",day,slot) and day==now.date():
+                        errors_today.append(slot+"_review")
+                continue
+            if state and (state.get("publish_attempt_started") or
+                          state.get("status") in ("PUBLISHING_RESULT_UNCERTAIN_NO_RETRY",
+                                                  "PUBLISH_SENT_NOT_VERIFIED")):
+                # A read-only reconciliation, never blindly resend the POST.
+                if attempted_reviews<max_reviews:
+                    attempted_reviews+=1
+                    if not run_recovery_task("verify",day,slot) and day==now.date():
+                        errors_today.append(slot+"_uncertain")
+                continue
+            if attempted_publications<max_publications:
+                attempted_publications+=1
+                if not run_recovery_task("publish",day,slot) and day==now.date():
+                    errors_today.append(slot+"_publish")
+    log("RECOVERY_SCAN_DONE","posts_attempted",attempted_publications,
+        "reviews_attempted",attempted_reviews,"today_errors",len(errors_today))
+    if errors_today:
+        raise RuntimeError("RECOVERY_INCOMPLETE_TODAY_"+",".join(errors_today))
+
 def main():
     mode=sys.argv[1] if len(sys.argv)>1 else "dry_run"
-    if mode not in ("dry_run","publish","verify"):
+    if mode not in ("dry_run","publish","verify","recover"):
         raise SystemExit(2)
     if mode=="dry_run":dry_run()
     elif mode=="publish":publish()
-    else:verify()
+    elif mode=="verify":verify()
+    else:recover()
 
 if __name__=="__main__":
     try:main()

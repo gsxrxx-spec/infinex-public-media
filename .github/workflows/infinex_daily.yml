@@ -1,4 +1,4 @@
-name: INFINEX - dos carruseles diarios Instagram
+name: INFINEX - publicacion y recuperacion Instagram
 
 on:
   schedule:
@@ -10,19 +10,23 @@ on:
       timezone: 'Europe/Madrid'
     - cron: '15 17 * * *'
       timezone: 'Europe/Madrid'
+    # Recuperacion independiente del ordenador. Las ejecuciones pueden retrasarse.
+    - cron: '7,22,37,52 * * * *'
+      timezone: 'Europe/Madrid'
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Comprobar sin publicar, publicar o revisar'
+        description: 'Dry run, recuperar pendientes, publicar turno o verificar'
         required: true
         default: dry_run
         type: choice
         options:
           - dry_run
+          - recover
           - publish
           - verify
       slot:
-        description: 'Franja 09 o 17'
+        description: 'Franja 09 o 17 (no aplicable a recover)'
         required: true
         default: '09'
         type: choice
@@ -40,11 +44,11 @@ concurrency:
 jobs:
   instagram:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 35
     env:
       INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
-      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || (contains(fromJSON('["15 9 * * *","15 17 * * *"]'), github.event.schedule) && 'verify' || 'publish') }}
-      INFINEX_SLOT: ${{ github.event_name == 'workflow_dispatch' && inputs.slot || (contains(fromJSON('["0 17 * * *","15 17 * * *"]'), github.event.schedule) && '17' || '09') }}
+      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'recover' }}
+      INFINEX_SLOT: ${{ github.event_name == 'workflow_dispatch' && inputs.slot || '09' }}
     steps:
       - name: Obtener repositorio
         uses: actions/checkout@v4
