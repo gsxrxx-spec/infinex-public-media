@@ -1,15 +1,19 @@
-name: INFINEX - carrusel diario Instagram
+name: INFINEX - dos carruseles diarios Instagram
 
 on:
   schedule:
-    - cron: '30 9 * * *'
+    - cron: '0 9 * * *'
       timezone: 'Europe/Madrid'
-    - cron: '45 9 * * *'
+    - cron: '15 9 * * *'
+      timezone: 'Europe/Madrid'
+    - cron: '0 17 * * *'
+      timezone: 'Europe/Madrid'
+    - cron: '15 17 * * *'
       timezone: 'Europe/Madrid'
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Comprobación sin publicar, publicar hoy o verificar hoy'
+        description: 'Comprobar sin publicar, publicar o revisar'
         required: true
         default: dry_run
         type: choice
@@ -17,6 +21,14 @@ on:
           - dry_run
           - publish
           - verify
+      slot:
+        description: 'Franja 09 o 17'
+        required: true
+        default: '09'
+        type: choice
+        options:
+          - '09'
+          - '17'
 
 permissions:
   contents: write
@@ -31,7 +43,8 @@ jobs:
     timeout-minutes: 12
     env:
       INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
-      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || (github.event.schedule == '45 9 * * *' && 'verify' || 'publish') }}
+      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || (contains(fromJSON('["15 9 * * *","15 17 * * *"]'), github.event.schedule) && 'verify' || 'publish') }}
+      INFINEX_SLOT: ${{ github.event_name == 'workflow_dispatch' && inputs.slot || (contains(fromJSON('["0 17 * * *","15 17 * * *"]'), github.event.schedule) && '17' || '09') }}
     steps:
       - name: Obtener repositorio
         uses: actions/checkout@v4

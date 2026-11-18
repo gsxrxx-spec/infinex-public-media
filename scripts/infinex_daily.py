@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""INFINEX: 09:30 Europe/Madrid Instagram carousel with no duplicate retries."""
+"""INFINEX: two carousels daily at 09 and 17 Europe/Madrid without duplicate retries."""
 from __future__ import annotations
 import hashlib
 import io
@@ -31,11 +31,19 @@ WHITE = (245,246,248)
 GRAY = (178,181,185)
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-DATE = datetime.now(TZ).date()
+# Date override is possible exclusively in a NON-publishing dry_run.
+IS_DRY_RUN = len(sys.argv)>1 and sys.argv[1]=="dry_run"
+DATE = (date.fromisoformat(os.environ["INFINEX_DRYRUN_DATE"])
+        if IS_DRY_RUN and os.getenv("INFINEX_DRYRUN_DATE")
+        else datetime.now(TZ).date())
 DAY_KEY = DATE.isoformat()
-MEDIA_DIR = BASE / "assets/daily" / DAY_KEY
-RECORD_FILE = BASE / "records" / (DAY_KEY+".json")
-REVIEW_TAG = "INFINEX-DIARIO-" + DATE.strftime("%Y%m%d")
+SLOT = os.getenv("INFINEX_SLOT","09")
+if SLOT not in ("09","17"):
+    raise RuntimeError("INVALID_PUBLICATION_SLOT")
+SLOT_TIME = SLOT + ":00"
+MEDIA_DIR = BASE / "assets/daily" / DAY_KEY / SLOT
+RECORD_FILE = BASE / "records" / (DAY_KEY+"_"+SLOT+".json")
+REVIEW_TAG = "INFINEX-DIARIO-" + DATE.strftime("%Y%m%d") + "-" + SLOT
 
 def log(*parts):
     print(*parts,flush=True)
@@ -86,13 +94,14 @@ def photo_selection():
     if epoch<0:
         raise RuntimeError("DATE_BEFORE_START")
     groups=("welding","gates","structures")
-    rotation=epoch%3
+    # Distinct morning/evening photo selection: 2 editions per day.
+    edition = epoch*2+(0 if SLOT=="09" else 1)
+    rotation=edition%3
     output=[]
     for index in range(3):
         group=groups[(index+rotation)%3]
         candidates=data[group]
-        # Imagen distinta por jornada durante los primeros 9 dias; rotación verificada.
-        offset=(epoch//3 + index*2)%len(candidates)
+        offset=(edition//3 + index*2)%len(candidates)
         output.append((group,candidates[offset]))
     return output
 
@@ -111,7 +120,7 @@ def caption_for(chosen):
             "📷 Fotografías ilustrativas de archivo (Pexels). No son obras ejecutadas "
             "por INFINEX.\n\n"
             "#INFINEX #Metalisteria #EstructurasMetalicas #Hierro #Automatismos\n\n"
-            + "📅 " + DATE.strftime("%d/%m/%Y"))
+            + "📅 " + DATE.strftime("%d/%m/%Y") + " · " + SLOT_TIME)
 
 def render_slide(photo_image,category,number,out):
     if hashlib.sha256(LOGO.read_bytes()).hexdigest()!=LOGO_SHA256:
@@ -154,7 +163,7 @@ def build():
     chosen=photo_selection()
     if not LOGO.exists(): raise RuntimeError("LOGO_NOT_FOUND")
     MEDIA_DIR.mkdir(parents=True,exist_ok=True)
-    manifest={"date":DAY_KEY,"destination":IG_USERNAME,"license":"https://www.pexels.com/license/",
+    manifest={"date":DAY_KEY,"slot":SLOT,"destination":IG_USERNAME,"license":"https://www.pexels.com/license/",
               "not_actual_infinex_works":True,"sources":[],"images":[]}
     for i,(category,photo) in enumerate(chosen,1):
         image=download_photo(photo)
@@ -243,7 +252,7 @@ def find_today(caption):
 def dry_run():
     preflight()
     chosen,manifest=build()
-    log("DRY_RUN_OK","date",DAY_KEY,"images",len(manifest["images"]))
+    log("DRY_RUN_OK","date",DAY_KEY,"slot",SLOT,"images",len(manifest["images"]))
     log("SAFETY","NO_POST","NO_COMMIT","TOKEN_NOT_PRINTED")
     for source in manifest["sources"]:log("LICENSED_SOURCE",source["page"])
 
@@ -260,13 +269,13 @@ def publish():
         log("EXISTING_INSTAGRAM_CAPTION_FOUND_NO_REPOST")
         raise RuntimeError("POST_EXISTS_WITHOUT_LOCAL_RECORD")
     chosen,manifest=build()
-    state={"date":DAY_KEY,"target":IG_USERNAME,"account_id":IG_ID,
+    state={"date":DAY_KEY,"slot":SLOT,"target":IG_USERNAME,"account_id":IG_ID,
            "status":"CLAIMED_NO_RETRY","caption":expected_caption,
            "images":manifest["images"],"media_id":None,"children":[],"creation_id":None,
            "source":"Pexels; illustrative photos, not INFINEX jobs"}
     atomic_record(state)
     commit([str(RECORD_FILE.relative_to(BASE)),str(MEDIA_DIR.relative_to(BASE))],
-           "INFINEX reserve daily IG post "+DAY_KEY)
+           "INFINEX reserve daily IG post "+DAY_KEY+" "+SLOT)
     # La reserva ya se ha confirmado en Git: si falla algo, no repetir POST sin leer Meta.
     try:
         public_images_are_ready(manifest)
@@ -286,7 +295,7 @@ def publish():
         if not status_code(state["creation_id"]):raise RuntimeError("META_PARENT_FAILED")
         state["status"]="PUBLISHING_RESULT_UNCERTAIN_NO_RETRY"
         atomic_record(state)
-        commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX publish attempt reserved "+DAY_KEY)
+        commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX publish attempt reserved "+DAY_KEY+" "+SLOT)
         # ÚNICA solicitud real; nunca hacer segundo POST ante un timeout.
         published=api(IG_ID+"/media_publish","POST",{"creation_id":state["creation_id"]})
         state["media_id"]=str(published["id"])
@@ -299,27 +308,27 @@ def publish():
                 state["permalink"]=post["permalink"]
                 state["timestamp"]=post.get("timestamp")
                 atomic_record(state)
-                commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX verified IG post "+DAY_KEY)
+                commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX verified IG post "+DAY_KEY+" "+SLOT)
                 log("PUBLISHED_VERIFIED",post["permalink"],"child_count",3)
                 return
             except RuntimeError:
                 time.sleep(3)
-        commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX pending readback "+DAY_KEY)
+        commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX pending readback "+DAY_KEY+" "+SLOT)
         raise RuntimeError("POST_SENT_BUT_READBACK_PENDING")
     except Exception as e:
         state["error_code"]=str(e)[:80]
         if state["status"]=="CLAIMED_NO_RETRY":
             state["status"]="PRE_PUBLISH_FAILED_NO_AUTOMATIC_RETRY"
         atomic_record(state)
-        try:commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX error state "+DAY_KEY)
+        try:commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX error state "+DAY_KEY+" "+SLOT)
         except Exception:pass
         raise
 
 def verify():
     preflight()
     if not RECORD_FILE.exists():
-        log("REVIEW_NO_PUBLICATION_RECORD",DAY_KEY)
-        return
+        log("REVIEW_NO_PUBLICATION_RECORD",DAY_KEY,"slot",SLOT)
+        raise RuntimeError("REVIEW_MISSING_PUBLICATION_RECORD")
     state=json.loads(RECORD_FILE.read_text(encoding="utf-8"))
     caption=state["caption"]
     media_id=state.get("media_id")
@@ -335,8 +344,8 @@ def verify():
     state["timestamp"]=post.get("timestamp")
     state["reviewed_at"]=datetime.now(TZ).isoformat()
     atomic_record(state)
-    commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX review 09:45 "+DAY_KEY)
-    log("INDEPENDENT_REVIEW_VERIFIED",post["permalink"])
+    commit([str(RECORD_FILE.relative_to(BASE))],"INFINEX review "+SLOT+":15 "+DAY_KEY)
+    log("INDEPENDENT_REVIEW_VERIFIED",DAY_KEY,SLOT,post["permalink"])
 
 def main():
     mode=sys.argv[1] if len(sys.argv)>1 else "dry_run"
