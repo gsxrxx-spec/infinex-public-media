@@ -20,7 +20,13 @@ def fetch(endpoint, token):
         with urllib.request.urlopen(req, timeout=25) as response:
             return json.load(response)
     except urllib.error.HTTPError as err:
-        raise RuntimeError("META_HTTP_" + str(err.code)) from None
+        try:
+            parsed = json.loads(err.read(4096)).get("error", {})
+            meta_code = str(parsed.get("code", "unknown"))
+            subcode = str(parsed.get("error_subcode", "none"))
+        except Exception:
+            meta_code, subcode = "unavailable", "unavailable"
+        raise RuntimeError("META_HTTP_" + str(err.code) + "_CODE_" + meta_code + "_SUBCODE_" + subcode) from None
     except Exception:
         raise RuntimeError("META_NETWORK_FAILURE") from None
 
