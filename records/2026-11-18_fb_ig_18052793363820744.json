@@ -4,7 +4,7 @@
   "caption_sha256": "a337bfc4ebd02e1a44c7765d10c618e0ad38d71a4d11079883cd89116b1f2e1f",
   "date": "2026-11-18",
   "page_id": "1598994686632912",
-  "status": "PUBLIC_POST_RESULT_UNCERTAIN",
+  "status": "PUBLISHED_VERIFIED",
   "publish_attempt_started": true,
   "assets": [
     {
@@ -24,5 +24,8 @@
     "122095423329560527",
     "122095423395560527",
     "122095423527560527"
-  ]
+  ],
+  "post_id": "1598994686632912_122095423635560527",
+  "permalink": "https://www.facebook.com/122095406595560527/posts/122095423635560527",
+  "verified_at": "2026-11-19T03:42:23.848886+01:00"
 }
