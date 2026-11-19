@@ -84,5 +84,5 @@ jobs:
           INFINEX_SLOT: '17'
         run: python scripts/infinex_daily.py dry_run
       - name: Sincronizar Facebook con el carrusel verificado de Instagram
-        if: ${{ env.MODE == 'recover' || env.MODE == 'publish' || env.MODE == 'dry_run' }}
+        if: ${{ env.MODE == 'recover' || env.MODE == 'publish' || (env.MODE == 'dry_run' && github.event_name == 'workflow_dispatch') }}
         run: python scripts/infinex_facebook.py "$MODE"

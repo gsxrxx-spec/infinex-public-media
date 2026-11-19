@@ -98,12 +98,12 @@ TOPIC_ROTATION = TOPICS
 SLIDE_DETAILS = {
     "puertas": (
         ("Opciones lisas, de lamas o a medida", "Privacidad y estilo para tu entrada"),
-        ("Hierro, chapa o aluminio segun proyecto", "Medidas y acabados personalizados"),
-        ("Ensenanos la entrada y tus preferencias", "Solicita presupuesto sin compromiso"),
+        ("Hierro, chapa o aluminio según proyecto", "Medidas y acabados personalizados"),
+        ("Enséñanos la entrada y tus preferencias", "Solicita presupuesto sin compromiso"),
     ),
     "escaleras": (
-        ("Para interiores o zonas exteriores", "Diseno adaptado al espacio disponible"),
-        ("Tramos rectos o con giro segun hueco", "Barandillas y acabados a elegir"),
+        ("Para interiores o zonas exteriores", "Diseño adaptado al espacio disponible"),
+        ("Tramos rectos o con giro según hueco", "Barandillas y acabados a elegir"),
         ("Comparte medidas, fotos y tu idea", "Valora opciones sin compromiso"),
     ),
     "cerramientos": (
@@ -112,9 +112,9 @@ SLIDE_DETAILS = {
         ("Cuéntanos longitud, altura y diseño", "Pide presupuesto sin compromiso"),
     ),
     "soldadura": (
-        ("Uniones, refuerzos y adaptaciones", "Soluciones para piezas metalicas"),
-        ("Cada union responde a un uso", "Revisamos necesidades y acabados"),
-        ("Comparte una foto y tu idea", "Solicita valoracion sin compromiso"),
+        ("Uniones, refuerzos y adaptaciones", "Soluciones para piezas metálicas"),
+        ("Cada unión responde a un uso", "Revisamos necesidades y acabados"),
+        ("Comparte una foto y tu idea", "Solicita valoración sin compromiso"),
     ),
 }
 
