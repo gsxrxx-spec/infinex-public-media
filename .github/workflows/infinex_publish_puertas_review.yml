@@ -1,0 +1,27 @@
+name: INFINEX - carrusel de puertas metalicas a medida (revision)
+on:
+  push:
+    paths:
+      - '.github/workflows/infinex_publish_puertas_review.yml'
+permissions:
+  contents: write
+concurrency:
+  group: infinex-instagram-diario
+  cancel-in-progress: false
+jobs:
+  puertas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Publicar carrusel de un solo tema y confirmar desde Meta
+        run: python scripts/infinex_publish_puertas_review.py

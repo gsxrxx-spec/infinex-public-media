@@ -1,0 +1,29 @@
+{
+  "campaign": "INFINEX-20261119-PUERTAS-01",
+  "theme": "puertas_metalicas",
+  "date": "2026-11-19",
+  "destination": "infinex_2025",
+  "license": "https://www.pexels.com/license/",
+  "not_actual_infinex_works": true,
+  "logo_sha256": "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
+  "images": [
+    {
+      "path": "assets/campaigns/puertas_20261119/01.jpg",
+      "sha256": "5bc13479eb028e8d7dcaf1b3bb2bfe9811ff8e398a93112e4acc0b2eac011163",
+      "source_id": "18379563",
+      "source_page": "https://www.pexels.com/photo/tall-metal-fence-18379563/"
+    },
+    {
+      "path": "assets/campaigns/puertas_20261119/02.jpg",
+      "sha256": "6a2e505786ef02e72d709900ae503c1969d8b77afd17f4640c9d9cab8766bb24",
+      "source_id": "4671453",
+      "source_page": "https://www.pexels.com/photo/metal-gate-on-brick-wall-4671453/"
+    },
+    {
+      "path": "assets/campaigns/puertas_20261119/03.jpg",
+      "sha256": "79dd56984022fbb28200030bad290c5049303e7dab6181babfd01abbbf2595ee",
+      "source_id": "9163098",
+      "source_page": "https://www.pexels.com/photo/a-metal-gate-securing-a-passage-9163098/"
+    }
+  ]
+}
