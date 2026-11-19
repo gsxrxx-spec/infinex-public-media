@@ -1,0 +1,46 @@
+name: INFINEX - watchdog alternativo de publicaciones pendientes
+
+on:
+  schedule:
+    # Second scheduler, staggered from the main 15-minute cron.
+    # Every run checks due slots in Europe/Madrid, no fixed time assumptions.
+    - cron: '11,41 * * * *'
+      timezone: 'Europe/Madrid'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: infinex-instagram-diario
+  cancel-in-progress: false
+
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+      INFINEX_FB_PAGE_TOKEN: ${{ secrets.INFINEX_FB_PAGE_TOKEN }}
+    steps:
+      - name: Obtener el repositorio
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Actualizar estado antes de revisar publicaciones
+        shell: bash
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencia grafica
+        run: python -m pip install 'Pillow>=11.0,<13'
+      - name: Pruebas de duplicados y recuperacion
+        run: python tests/test_infinex_facebook.py
+      - name: Recuperar Instagram cuando falte un turno
+        run: python scripts/infinex_daily.py recover
+      - name: Espejar en Facebook solo despues de verificar Instagram
+        run: python scripts/infinex_facebook.py recover
