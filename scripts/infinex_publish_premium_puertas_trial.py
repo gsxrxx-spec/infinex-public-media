@@ -6,6 +6,7 @@ Read back the published IG media and persist Git ledger; never blind-retry.
 """
 import hashlib, json, os, subprocess, sys, time, urllib.parse, urllib.request, urllib.error
 from pathlib import Path
+from infinex_editorial_policy import assert_not_consecutive
 
 BASE=Path(__file__).resolve().parents[1]
 IG_ID="17841435427297631"
@@ -81,6 +82,11 @@ def find_existing():
         if item.get("caption")==CAPTION:
             return check_post(item["id"])
     return None
+def enforce_distinct_from_latest():
+    current=api(IG_ID+"/media?fields=id,caption,media_type,timestamp&limit=10")
+    prior=assert_not_consecutive(current.get("data"),"puertas")
+    log("EDITORIAL_NO_CONSECUTIVE_TOPIC_PASSED",prior or "first_post","next","puertas")
+
 def status_ok(ident):
     for i in range(10):
         code=api(str(ident)+"?fields=status_code").get("status_code","")
@@ -104,6 +110,7 @@ def main():
         raise RuntimeError("PREVIOUS_VERIFIED_BUT_DELETED_NO_AUTO_REPOST")
     if state.get("publish_attempt_started"):
         raise RuntimeError("UNCONFIRMED_POST_NO_AUTOMATIC_RETRY")
+    enforce_distinct_from_latest()
     images=verify_assets()
     state.update({"date":"2026-11-19","topic":"puertas_metalicas","account_id":IG_ID,
                   "caption":CAPTION,"images":images,"publish_attempt_started":False,
@@ -123,6 +130,7 @@ def main():
         if not creation.isdigit():raise RuntimeError("PARENT_CREATION_MISSING")
         state["creation_id"]=creation;save(state)
         status_ok(creation)
+        enforce_distinct_from_latest()
         state["status"]="PUBLISH_RESULT_UNCERTAIN_NO_RETRY"
         state["publish_attempt_started"]=True
         save(state);commit("reserved only public publish attempt")

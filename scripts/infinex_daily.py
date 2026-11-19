@@ -15,6 +15,7 @@ from datetime import datetime, date, time as dtime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageOps
+from infinex_editorial_policy import TOPICS, assert_not_consecutive
 
 BASE = Path(__file__).resolve().parents[1]
 IG_ID = "17841435427297631"
@@ -91,7 +92,31 @@ def download_photo(photo):
 def font(size,bold=False):
     return ImageFont.truetype(FONT_BOLD if bold else FONT_REGULAR,size)
 
-TOPIC_ROTATION = ("puertas", "escaleras", "cerramientos", "soldadura")
+TOPIC_ROTATION = TOPICS
+
+# Dos datos practicos por diapositiva, sin mezclar servicios ni saturar diseño.
+SLIDE_DETAILS = {
+    "puertas": (
+        ("Opciones lisas, de lamas o a medida", "Privacidad y estilo para tu entrada"),
+        ("Hierro, chapa o aluminio segun proyecto", "Medidas y acabados personalizados"),
+        ("Ensenanos la entrada y tus preferencias", "Solicita presupuesto sin compromiso"),
+    ),
+    "escaleras": (
+        ("Para interiores o zonas exteriores", "Diseno adaptado al espacio disponible"),
+        ("Tramos rectos o con giro segun hueco", "Barandillas y acabados a elegir"),
+        ("Comparte medidas, fotos y tu idea", "Valora opciones sin compromiso"),
+    ),
+    "cerramientos": (
+        ("Para patios, entradas y jardines", "Delimita sin renunciar al estilo"),
+        ("Opciones de privacidad y acabados", "Medidas ajustadas a cada espacio"),
+        ("Cuéntanos longitud, altura y diseño", "Pide presupuesto sin compromiso"),
+    ),
+    "soldadura": (
+        ("Uniones, refuerzos y adaptaciones", "Soluciones para piezas metalicas"),
+        ("Cada union responde a un uso", "Revisamos necesidades y acabados"),
+        ("Comparte una foto y tu idea", "Solicita valoracion sin compromiso"),
+    ),
+}
 
 def topic_for_slot():
     epoch = (DATE-date(2026,11,19)).days
@@ -198,10 +223,17 @@ def render_slide(photo_image,category,number,out):
     size=64
     while d.textbbox((0,0),title,font=font(size,True))[2]>W-110: size-=2
     d.text((60,1023),title,font=font(size,True),fill=WHITE)
-    d.text((62,1122),sub,font=font(35),fill=(218,220,221))
-    d.line((60,1200,1020,1200),fill=(71,76,79),width=2)
-    d.text((60,1230),"INFINEX  ·  IDEAS EN HIERRO",font=font(27,True),fill=ORANGE)
-    d.text((60,1292),"Fotografía ilustrativa · Pexels",font=font(19),fill=GRAY)
+    d.text((62,1112),sub,font=font(34),fill=(218,220,221))
+    # Dos detalles practicos diferentes para cada pagina.
+    details = SLIDE_DETAILS[topic_for_slot()][number-1]
+    for index, fact in enumerate(details):
+        label = "• " + fact
+        if d.textbbox((0,0),label,font=font(25))[2] > W-118:
+            raise RuntimeError("EDITORIAL_SLIDE_DETAIL_OVERFLOW")
+        d.text((62,1159+index*36),label,font=font(25),fill=(218,220,221))
+    d.line((60,1240,1020,1240),fill=(71,76,79),width=2)
+    d.text((60,1252),"INFINEX  ·  IDEAS EN HIERRO",font=font(25,True),fill=ORANGE)
+    d.text((60,1300),"Fotografía ilustrativa · Pexels",font=font(18),fill=GRAY)
     canvas.save(out,"JPEG",quality=92,subsampling=0,optimize=True)
 
 def build():
@@ -327,6 +359,15 @@ def find_today(caption):
             return item
     return None
 
+def check_latest_topic():
+    # Compare with the real latest visible publication, including manual and
+    # one-off campaigns. If the subject is ambiguous, do not publish.
+    response = api(IG_ID+"/media?fields=id,caption,media_type,timestamp&limit=10")
+    preceding = assert_not_consecutive(response.get("data"), topic_for_slot())
+    log("EDITORIAL_NO_CONSECUTIVE_TOPIC_PASSED", preceding or "first_post",
+        "next", topic_for_slot())
+
+
 def dry_run():
     preflight()
     chosen,manifest=build()
@@ -361,6 +402,7 @@ def publish():
                "INFINEX reconciled IG post "+DAY_KEY+" "+SLOT)
         log("RECONCILED_PUBLISHED_VERIFIED",post["permalink"])
         return
+    check_latest_topic()
     if previous:
         if (previous.get("publish_attempt_started") or previous.get("media_id") or
             previous.get("status") in ("PUBLISHING_RESULT_UNCERTAIN_NO_RETRY",
@@ -397,6 +439,8 @@ def publish():
         state["creation_id"]=str(parent["id"])
         atomic_record(state)
         if not status_code(state["creation_id"]):raise RuntimeError("META_PARENT_FAILED")
+        # Comprobar de nuevo justo antes de la unica publicacion publica.
+        check_latest_topic()
         state["publish_attempt_started"]=True
         state["status"]="PUBLISHING_RESULT_UNCERTAIN_NO_RETRY"
         atomic_record(state)

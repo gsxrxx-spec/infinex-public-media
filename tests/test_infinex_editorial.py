@@ -2,8 +2,10 @@
 """Validate INFINEX's one-topic-per-carousel editorial calendar without publishing."""
 import importlib.util
 import zoneinfo
+import sys
 from datetime import date,timezone
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"scripts"))
 sp=importlib.util.spec_from_file_location("infinex_daily_editorial",Path(__file__).resolve().parents[1]/"scripts"/"infinex_daily.py")
 original=zoneinfo.ZoneInfo
 try:
