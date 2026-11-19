@@ -1,0 +1,22 @@
+name: INFINEX - consultar ultimo carrusel Instagram (sin publicar)
+on:
+  push:
+    paths:
+      - '.github/workflows/infinex_latest_instagram_audit.yml'
+      - 'scripts/infinex_latest_instagram_audit.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Consulta IG read only
+        run: python scripts/infinex_latest_instagram_audit.py
