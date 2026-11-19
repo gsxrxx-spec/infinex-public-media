@@ -32,6 +32,12 @@ def main():
     identity = fetch("me?fields=id,name", token)
     if str(identity.get("id")) != EXPECTED_PAGE:
         print("TOKEN_IS_USER_NOT_PAGE")
+        permissions = fetch("me/permissions", token)
+        grants = {item.get("permission"): item.get("status")
+                  for item in permissions.get("data", [])}
+        for requested in ("pages_show_list", "pages_read_engagement", "pages_manage_posts"):
+            print("TOKEN_PERMISSION_" + requested.upper(),
+                  grants.get(requested, "NOT_GRANTED_OR_MISSING"))
         accounts = fetch("me/accounts?fields=id,name,tasks,access_token&limit=50", token)
         candidates = [p for p in accounts.get("data", [])
                       if str(p.get("id")) == EXPECTED_PAGE]
