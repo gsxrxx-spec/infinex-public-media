@@ -60,7 +60,9 @@ def main():
     for label, suffix in (
         ("FEED_MINIMAL", "/feed?fields=id&limit=1"),
         ("PUBLISHED_POSTS", "/published_posts?fields=id&limit=1"),
+        ("PUBLISHED_POSTS_FULL", "/published_posts?fields=id,message,permalink_url&limit=10"),
         ("POSTS", "/posts?fields=id&limit=1"),
+        ("POSTS_FULL", "/posts?fields=id,message,permalink_url&limit=10"),
         ("FEED_FULL", "/feed?fields=id,message,permalink_url&limit=1"),
     ):
         try:
