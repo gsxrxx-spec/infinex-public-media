@@ -36,3 +36,17 @@ for offset in range(8):
         print("EDITORIAL_SLOT_OK",m.DATE,slot,theme,3)
 assert seen==set(expected)
 print("EDITORIAL_SINGLE_TOPIC_TEST_PASSED",len(seen),"themes",16,"slots")
+
+# The owner deleted the mixed-subject morning post. Never republish it.
+import json
+rejected=Path(__file__).resolve().parents[1]/"records"/"2026-11-19_09.json"
+data=json.loads(rejected.read_text(encoding="utf-8"))
+assert data["status"]=="REJECTED_BY_USER" and data["do_not_republish"] is True
+m.DATE=date(2026,11,19)
+m.SLOT="09"
+m.SLOT_TIME="09:00"
+m.RECORD_FILE=rejected
+m.preflight=lambda: True
+m.api=lambda *args,**kwargs: (_ for _ in ()).throw(AssertionError("Unexpected API call"))
+m.publish()
+print("EDITORIAL_REJECTED_POST_NO_REPUBLISH_PASSED")

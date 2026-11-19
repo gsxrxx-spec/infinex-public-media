@@ -341,6 +341,10 @@ def publish():
     expected_caption=caption_for(chosen)
     previous=(json.loads(RECORD_FILE.read_text(encoding="utf-8"))
               if RECORD_FILE.exists() else None)
+    if previous and (previous.get("do_not_republish") or
+                     previous.get("status")=="REJECTED_BY_USER"):
+        log("SKIPPED_USER_REJECTED",DAY_KEY,SLOT)
+        return
     if previous and previous.get("status")=="PUBLISHED_VERIFIED":
         log("SKIPPED_ALREADY_VERIFIED",DAY_KEY,SLOT,previous.get("permalink",""))
         return
@@ -484,6 +488,10 @@ def recover():
                     log("RECOVERY_INVALID_LEDGER",day.isoformat(),slot)
                     if day==now.date():errors_today.append(slot+"_invalid_ledger")
                     continue
+            if state and (state.get("do_not_republish") or
+                          state.get("status")=="REJECTED_BY_USER"):
+                log("RECOVERY_SKIPPED_USER_REJECTED",day.isoformat(),slot)
+                continue
             if state and state.get("status")=="PUBLISHED_VERIFIED":
                 if (now>=due+timedelta(minutes=15) and
                     not state.get("reviewed_at") and attempted_reviews<max_reviews):
