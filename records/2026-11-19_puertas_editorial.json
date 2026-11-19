@@ -25,11 +25,13 @@
   ],
   "publish_attempt_started": true,
   "attempt": 1,
-  "status": "PUBLISH_RESULT_UNCERTAIN_NO_RETRY",
+  "status": "PUBLISHED_VERIFIED",
   "children": [
     "18113769602180910",
     "18113769620180910",
     "18113769638180910"
   ],
-  "creation_id": "18113769671180910"
+  "creation_id": "18113769671180910",
+  "media_id": "17871884298659464",
+  "permalink": "https://www.instagram.com/p/Df65eB4IHfb/"
 }
