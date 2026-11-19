@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-19",
+  "slot": "17",
+  "target": "infinex_2025",
+  "account_id": "17841435427297631",
+  "status": "CLAIMED_NO_RETRY",
+  "caption": "INFINEX | Ideas en hierro. Soluciones reales. 🟠\n\n¿Y si esa escalera aprovechara mejor el espacio y además se convirtiera en uno de los detalles favoritos de tu casa? 🔶\n\nEn INFINEX realizamos escaleras metálicas a medida para adaptarlas a cada hueco, recorrido y estilo. Acabados a tu gusto y soluciones personalizadas, para interior o exterior según tu proyecto.\n\nCuéntanos cómo imaginas tu escalera y pide presupuesto sin compromiso.\n\n#INFINEX #EscalerasMetalicas #EscalerasAMedida #Metalisteria\n\n📷 Fotografías ilustrativas de archivo (Pexels). No son obras ejecutadas por INFINEX.\n\n📅 19/11/2026 · 17:00",
+  "images": [
+    {
+      "path": "assets/daily/2026-11-19/17/01.jpg",
+      "sha256": "8eff20c1d6f1f242d1f14e6d15a52025905f195abe101a661b2d9dc2f7919f1e"
+    },
+    {
+      "path": "assets/daily/2026-11-19/17/02.jpg",
+      "sha256": "cab630b9c2517950086126504d558303f3e66a51d0a7e7873991d76f75545330"
+    },
+    {
+      "path": "assets/daily/2026-11-19/17/03.jpg",
+      "sha256": "c3b1c9bbc7b9e6e3afe6ca9d7a28aa15e7528364544ffe337a45b359b3823a0e"
+    }
+  ],
+  "media_id": null,
+  "children": [],
+  "creation_id": null,
+  "publish_attempt_started": false,
+  "attempt_count": 1,
+  "source": "Pexels; illustrative photos, not INFINEX jobs"
+}
