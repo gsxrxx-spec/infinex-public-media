@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-19",
+  "topic": "puertas_metalicas",
+  "account_id": "17841435427297631",
+  "caption": "¿Y si tu entrada fuera de esas que hacen que te detengas a mirar? 🟠🚪\n\nUna puerta metálica a medida no es solo un acceso: puede transformar la fachada, aportar privacidad y reflejar tu estilo.\n\nEn INFINEX trabajamos soluciones metálicas personalizadas, estudiando medidas, materiales y acabados para cada proyecto. Desde diseños minimalistas hasta accesos con carácter.\n\n📐 Adaptación a tu espacio.\n🎨 Detalles y acabados a tu gusto.\n🛠️ Una solución pensada para el uso que necesitas.\n\n¿La imaginas en tu casa o negocio? Escríbenos por mensaje privado y pide presupuesto sin compromiso.\n\n📷 Fotografías ilustrativas de archivo (Pexels). No muestran obras realizadas por INFINEX.\n\n#INFINEX #PuertasMetalicas #PuertasAMedida #Metalisteria #CarpinteriaMetalica #DisenoPersonalizado",
+  "images": [
+    {
+      "path": "assets/campaigns/puertas_premium_nov2026_trial/01.jpg",
+      "sha256": "8eee43a9ee779d7a800cfb46393a176e5a03eeac5564143a8836fc6b79cbf68c",
+      "source_id": "14499728",
+      "source_page": "https://www.pexels.com/photo/view-of-a-modern-house-with-flowers-on-a-balcony-and-black-garage-door-14499728/"
+    },
+    {
+      "path": "assets/campaigns/puertas_premium_nov2026_trial/02.jpg",
+      "sha256": "e3a5e12cac91525770b2381ca0e9af8a65fe57826033a066277e988e5bcabcbe",
+      "source_id": "34190707",
+      "source_page": "https://www.pexels.com/photo/minimalistic-black-door-on-urban-street-34190707/"
+    },
+    {
+      "path": "assets/campaigns/puertas_premium_nov2026_trial/03.jpg",
+      "sha256": "545a42c8f42891fb2c95f8a8582abd76dfe62e3c0497c5026662b7a5a60bba2d",
+      "source_id": "28384143",
+      "source_page": "https://www.pexels.com/photo/modern-industrial-garage-door-with-number-49-28384143/"
+    }
+  ],
+  "publish_attempt_started": false,
+  "attempt": 1,
+  "status": "PRE_PUBLISH_PREPARED"
+}
