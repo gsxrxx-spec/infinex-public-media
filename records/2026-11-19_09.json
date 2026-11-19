@@ -3,7 +3,7 @@
   "slot": "09",
   "target": "infinex_2025",
   "account_id": "17841435427297631",
-  "status": "CLAIMED_NO_RETRY",
+  "status": "PUBLISHING_RESULT_UNCERTAIN_NO_RETRY",
   "caption": "INFINEX | Ideas en hierro. Soluciones reales. 🟠\n\nEstructuras metálicas · Soldadura y hierro · Puertas y vallas.\n\nExploramos diferentes aplicaciones del metal, desde el trabajo del hierro hasta cerramientos y estructuras. INFINEX trabaja en estructuras, hierro, automatismos y rehabilitación.\n\n📷 Fotografías ilustrativas de archivo (Pexels). No son obras ejecutadas por INFINEX.\n\n#INFINEX #Metalisteria #EstructurasMetalicas #Hierro #Automatismos\n\n📅 19/11/2026 · 09:00",
   "images": [
     {
@@ -20,9 +20,13 @@
     }
   ],
   "media_id": null,
-  "children": [],
-  "creation_id": null,
-  "publish_attempt_started": false,
+  "children": [
+    "18113767853180910",
+    "18113767871180910",
+    "18113767892180910"
+  ],
+  "creation_id": "18113767928180910",
+  "publish_attempt_started": true,
   "attempt_count": 1,
   "source": "Pexels; illustrative photos, not INFINEX jobs"
 }
