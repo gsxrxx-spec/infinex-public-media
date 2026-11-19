@@ -1,0 +1,38 @@
+name: INFINEX - recuperacion urgente del turno matinal 2026-11-19
+on:
+  push:
+    paths:
+      - '.github/workflows/infinex_recover_20261119.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: infinex-instagram-diario
+  cancel-in-progress: false
+
+jobs:
+  recover_missed_slot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+      INFINEX_FB_PAGE_TOKEN: ${{ secrets.INFINEX_FB_PAGE_TOKEN }}
+    steps:
+      - name: Recuperar estado desde rama principal
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Instalar Pillow
+        run: python -m pip install 'Pillow>=11.0,<13'
+      - name: Validar seguridad del espejo Facebook
+        run: python tests/test_infinex_facebook.py
+      - name: Recuperar turnos vencidos de Instagram
+        run: python scripts/infinex_daily.py recover
+      - name: Publicar espejo del carrusel verificado en Facebook
+        run: python scripts/infinex_facebook.py recover
