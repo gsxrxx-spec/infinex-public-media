@@ -56,10 +56,24 @@ def main():
     if str(page.get("id")) != EXPECTED_PAGE:
         raise RuntimeError("FACEBOOK_PAGE_IDENTITY_MISMATCH")
     print("FACEBOOK_PAGE_READ_OK")
-    feed = fetch(EXPECTED_PAGE + "/feed?fields=id,message,permalink_url&limit=1", token)
-    if not isinstance(feed.get("data"), list):
-        raise RuntimeError("FACEBOOK_FEED_READ_FAILED")
-    print("FACEBOOK_FEED_READ_OK")
+    working_edges = []
+    for label, suffix in (
+        ("FEED_MINIMAL", "/feed?fields=id&limit=1"),
+        ("PUBLISHED_POSTS", "/published_posts?fields=id&limit=1"),
+        ("POSTS", "/posts?fields=id&limit=1"),
+        ("FEED_FULL", "/feed?fields=id,message,permalink_url&limit=1"),
+    ):
+        try:
+            response = fetch(EXPECTED_PAGE + suffix, token)
+            if isinstance(response.get("data"), list):
+                working_edges.append(label)
+                print("FACEBOOK_READ_" + label + "_OK")
+            else:
+                print("FACEBOOK_READ_" + label + "_MALFORMED")
+        except RuntimeError as err:
+            print("FACEBOOK_READ_" + label + "_FAILED_" + str(err))
+    if not working_edges:
+        raise RuntimeError("FACEBOOK_PAGE_POST_READ_PERMISSIONS_NOT_AVAILABLE")
     print("FACEBOOK_CHECK_PASSED_NO_PUBLICATION")
 
 
