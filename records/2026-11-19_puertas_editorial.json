@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-19",
+  "topic": "puertas_metalicas",
+  "account_id": "17841435427297631",
+  "caption": "¿Y si tu puerta dejara de ser simplemente una puerta? 🚪🔶\n\nLa entrada de una casa puede cambiarlo todo: privacidad, estilo y esa primera impresión que hace que una fachada destaque.\n\nEn INFINEX diseñamos puertas metálicas a medida. Tú eliges el estilo: de chapa, reforzadas, de aluminio o diseños personalizados según tu espacio y tus preferencias.\n\n✨ Una entrada que te represente.\n📐 Medidas adaptadas al espacio disponible.\n🛠️ Acabados y diseños a tu gusto.\n\n¿Ya te imaginas la tuya? Escríbenos por mensaje privado, cuéntanos tu idea y pide presupuesto sin compromiso.\n\n📷 Fotografías ilustrativas de archivo (Pexels). No muestran obras realizadas por INFINEX.\n\n#INFINEX #PuertasMetalicas #PuertasAMedida #Metalisteria #DisenoAMedida #CarpinteriaMetalica",
+  "images": [
+    {
+      "path": "assets/campaigns/puertas_20261119/01.jpg",
+      "sha256": "5bc13479eb028e8d7dcaf1b3bb2bfe9811ff8e398a93112e4acc0b2eac011163",
+      "source_id": "18379563",
+      "source_page": "https://www.pexels.com/photo/tall-metal-fence-18379563/"
+    },
+    {
+      "path": "assets/campaigns/puertas_20261119/02.jpg",
+      "sha256": "6a2e505786ef02e72d709900ae503c1969d8b77afd17f4640c9d9cab8766bb24",
+      "source_id": "4671453",
+      "source_page": "https://www.pexels.com/photo/metal-gate-on-brick-wall-4671453/"
+    },
+    {
+      "path": "assets/campaigns/puertas_20261119/03.jpg",
+      "sha256": "79dd56984022fbb28200030bad290c5049303e7dab6181babfd01abbbf2595ee",
+      "source_id": "9163098",
+      "source_page": "https://www.pexels.com/photo/a-metal-gate-securing-a-passage-9163098/"
+    }
+  ],
+  "publish_attempt_started": false,
+  "attempt": 1,
+  "status": "PRE_PUBLISH_PREPARED"
+}
