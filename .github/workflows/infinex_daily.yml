@@ -7,6 +7,7 @@ on:
       - 'scripts/infinex_daily.py'
       - 'scripts/infinex_facebook.py'
       - 'tests/test_infinex_facebook.py'
+      - 'tests/test_infinex_editorial.py'
   schedule:
     - cron: '0 9 * * *'
       timezone: 'Europe/Madrid'
@@ -69,8 +70,15 @@ jobs:
         run: python -m pip install 'Pillow>=11.0,<13'
       - name: Pruebas de seguridad del espejo Facebook
         run: python tests/test_infinex_facebook.py
+      - name: Validar tema unico, fotos y CTA en cada franja
+        run: python tests/test_infinex_editorial.py
       - name: Comprobar y ejecutar INFINEX
         run: python scripts/infinex_daily.py "$MODE"
+      - name: Simular carrusel de las 17 sin publicar
+        if: ${{ github.event_name == 'push' }}
+        env:
+          INFINEX_SLOT: '17'
+        run: python scripts/infinex_daily.py dry_run
       - name: Sincronizar Facebook con el carrusel verificado de Instagram
         if: ${{ env.MODE == 'recover' || env.MODE == 'publish' || env.MODE == 'dry_run' }}
         run: python scripts/infinex_facebook.py "$MODE"

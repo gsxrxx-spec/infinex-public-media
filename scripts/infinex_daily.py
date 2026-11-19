@@ -91,41 +91,75 @@ def download_photo(photo):
 def font(size,bold=False):
     return ImageFont.truetype(FONT_BOLD if bold else FONT_REGULAR,size)
 
+TOPIC_ROTATION = ("puertas", "escaleras", "cerramientos", "soldadura")
+
+def topic_for_slot():
+    epoch = (DATE-date(2026,11,19)).days
+    if epoch < 0: raise RuntimeError("DATE_BEFORE_EDITORIAL_START")
+    edition = epoch*2 + (0 if SLOT=="09" else 1)
+    return TOPIC_ROTATION[edition % len(TOPIC_ROTATION)]
+
 def photo_selection():
     data=json.loads(BANK.read_text(encoding="utf-8"))
     if data.get("license")!="https://www.pexels.com/license/":
         raise RuntimeError("UNVERIFIED_IMAGE_LICENSE")
-    epoch=(DATE-date(2026,11,18)).days
-    if epoch<0:
-        raise RuntimeError("DATE_BEFORE_START")
-    groups=("welding","gates","structures")
-    # Distinct morning/evening photo selection: 2 editions per day.
-    edition = epoch*2+(0 if SLOT=="09" else 1)
-    rotation=edition%3
-    output=[]
-    for index in range(3):
-        group=groups[(index+rotation)%3]
-        candidates=data[group]
-        offset=(edition//3 + index*2)%len(candidates)
-        output.append((group,candidates[offset]))
-    return output
+    theme=topic_for_slot()
+    groups={"puertas":"gates","escaleras":"structures",
+            "cerramientos":"gates","soldadura":"welding"}
+    curated={
+        "puertas":["18379563","4671453","9163098","2034383","9376013"],
+        "escaleras":["31302980","8734898","3483789","13565214","12210675"],
+        "cerramientos":["18379563","7540017","26050773","5919806","4671453"],
+        "soldadura":["8976842","22863133","28852847","29386092","5759597"],
+    }
+    group=groups[theme]
+    catalog={str(p["id"]):p for p in data[group]}
+    allowed=curated[theme]
+    if any(photo not in catalog for photo in allowed):
+        raise RuntimeError("EDITORIAL_IMAGE_SOURCE_NOT_APPROVED")
+    edition=(DATE-date(2026,11,19)).days*2 + (0 if SLOT=="09" else 1)
+    offset=(edition//len(TOPIC_ROTATION)) % len(allowed)
+    return [(group,catalog[allowed[(offset+i)%len(allowed)]]) for i in range(3)]
 
 def caption_for(chosen):
-    text={
-        "welding":"Soldadura y hierro",
-        "gates":"Puertas y vallas",
-        "structures":"Estructuras metálicas",
+    # Cada carrusel vende un servicio concreto y termina con una acción.
+    copy={
+        "puertas":(
+            "¿Y si tu entrada tuviera el diseño que siempre has imaginado? 🚪🔶\n\n"
+            "Una puerta puede dar personalidad a toda una fachada. En INFINEX trabajamos "
+            "puertas metálicas a medida: de chapa, reforzadas, de aluminio y diseños "
+            "personalizados según el espacio y el estilo que buscas.\n\n"
+            "¿Te imaginas estrenando puerta? Escríbenos y pide presupuesto sin compromiso.\n\n"
+            "#INFINEX #PuertasMetalicas #PuertasAMedida #Metalisteria"),
+        "escaleras":(
+            "¿Y si esa escalera aprovechara mejor el espacio y además se convirtiera "
+            "en uno de los detalles favoritos de tu casa? 🔶\n\n"
+            "En INFINEX realizamos escaleras metálicas a medida para adaptarlas "
+            "a cada hueco, recorrido y estilo. Acabados a tu gusto y soluciones "
+            "personalizadas, para interior o exterior según tu proyecto.\n\n"
+            "Cuéntanos cómo imaginas tu escalera y pide presupuesto sin compromiso.\n\n"
+            "#INFINEX #EscalerasMetalicas #EscalerasAMedida #Metalisteria"),
+        "cerramientos":(
+            "Tu entrada y tu espacio exterior pueden ganar personalidad con un "
+            "cerramiento metálico pensado para ti. 🔶\n\n"
+            "¿Prefieres más privacidad, líneas modernas o un diseño clásico? "
+            "En INFINEX trabajamos vallas y cerramientos metálicos a medida, "
+            "adaptados al espacio y al acabado que quieras.\n\n"
+            "Escríbenos, enséñanos tu idea y pide presupuesto sin compromiso.\n\n"
+            "#INFINEX #CerramientosMetalicos #VallasMetalicas #Metalisteria"),
+        "soldadura":(
+            "¿Tienes una pieza de hierro que necesitas reparar, reforzar o adaptar? 🔶\n\n"
+            "A veces no necesitas sustituirlo todo: necesitas una solución metálica "
+            "bien pensada para el uso real. En INFINEX trabajamos el hierro y "
+            "la soldadura en proyectos a medida.\n\n"
+            "Cuéntanos qué necesitas y pide presupuesto sin compromiso.\n\n"
+            "#INFINEX #Soldadura #Hierro #FabricacionMetalica"),
     }
-    titles=" · ".join(text[g] for g,p in chosen)
-    return ("INFINEX | Ideas en hierro. Soluciones reales. 🟠\n\n"+
-            titles+".\n\n"
-            "Exploramos diferentes aplicaciones del metal, desde el trabajo del hierro "
-            "hasta cerramientos y estructuras. INFINEX trabaja en estructuras, hierro, "
-            "automatismos y rehabilitación.\n\n"
-            "📷 Fotografías ilustrativas de archivo (Pexels). No son obras ejecutadas "
-            "por INFINEX.\n\n"
-            "#INFINEX #Metalisteria #EstructurasMetalicas #Hierro #Automatismos\n\n"
-            + "📅 " + DATE.strftime("%d/%m/%Y") + " · " + SLOT_TIME)
+    theme=topic_for_slot()
+    return ("INFINEX | Ideas en hierro. Soluciones reales. 🟠\n\n"
+            +copy[theme]
+            +"\n\n📷 Fotografías ilustrativas de archivo (Pexels). No son obras ejecutadas por INFINEX."
+            +"\n\n📅 "+DATE.strftime("%d/%m/%Y")+" · "+SLOT_TIME)
 
 def render_slide(photo_image,category,number,out):
     if hashlib.sha256(LOGO.read_bytes()).hexdigest()!=LOGO_SHA256:
@@ -148,11 +182,17 @@ def render_slide(photo_image,category,number,out):
     canvas.paste(logo,(50,52))
     d=ImageDraw.Draw(canvas)
     labels={
-        "welding":("SOLDADURA Y HIERRO","El metal cobra forma"),
-        "gates":("PUERTAS Y VALLAS","Cerramientos y diseño"),
-        "structures":("ESTRUCTURAS METÁLICAS","Función y arquitectura")
+        "puertas":("PUERTAS METÁLICAS",("Tu entrada, tu estilo",
+                                    "Elige diseño y acabados","Pide presupuesto sin compromiso")),
+        "escaleras":("ESCALERAS A MEDIDA",("Tu espacio, tu diseño",
+                                        "Adaptadas a cada medida","Imagina la tuya y consúltanos")),
+        "cerramientos":("VALLAS Y CERRAMIENTOS",("Privacidad con personalidad",
+                                              "Elige tu acabado","Pide presupuesto sin compromiso")),
+        "soldadura":("SOLDADURA A MEDIDA",("El metal tiene solución",
+                                         "Repara, refuerza o adapta","Cuéntanos qué necesitas"))
     }
-    title,sub=labels[category]
+    title,subs=labels[topic_for_slot()]
+    sub=subs[number-1]
     d.text((870,82),f"{number:02d} / 03",font=font(29,True),fill=WHITE,stroke_width=1,stroke_fill=BLACK)
     d.rectangle((60,952,212,964),fill=ORANGE)
     size=64
@@ -184,9 +224,10 @@ def build():
 
 def review_before_publish(chosen,manifest,caption):
     """Automated preflight: correct brand, approved text, unique licensed photos and dimensions."""
-    expected_groups={"welding","gates","structures"}
-    if len(chosen)!=3 or {g for g,p in chosen}!=expected_groups:
-        raise RuntimeError("CONTENT_CATEGORIES_NOT_APPROVED")
+    expected_group={"puertas":"gates","escaleras":"structures",
+                    "cerramientos":"gates","soldadura":"welding"}[topic_for_slot()]
+    if len(chosen)!=3 or {g for g,p in chosen}!={expected_group}:
+        raise RuntimeError("CONTENT_MIXED_THEMES_NOT_ALLOWED")
     if len({str(p["id"]) for g,p in chosen})!=3:
         raise RuntimeError("CONTENT_REPEATED_PHOTO")
     if (len(manifest.get("images",[]))!=3 or len(manifest.get("sources",[]))!=3 or
