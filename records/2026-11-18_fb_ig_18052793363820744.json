@@ -4,8 +4,8 @@
   "caption_sha256": "a337bfc4ebd02e1a44c7765d10c618e0ad38d71a4d11079883cd89116b1f2e1f",
   "date": "2026-11-18",
   "page_id": "1598994686632912",
-  "status": "PREPARED_NO_PUBLIC_POST",
-  "publish_attempt_started": false,
+  "status": "PUBLIC_POST_RESULT_UNCERTAIN",
+  "publish_attempt_started": true,
   "assets": [
     {
       "file": "assets/2026-11-18/visual-b/infinex_visual_1.jpg",
@@ -19,5 +19,10 @@
       "file": "assets/2026-11-18/visual-b/infinex_visual_3.jpg",
       "sha256": "e0c07d02531278de0204d1f5767e3fe81b584fa500d35a3c5d0124b2733041b4"
     }
+  ],
+  "photo_ids": [
+    "122095423329560527",
+    "122095423395560527",
+    "122095423527560527"
   ]
 }
