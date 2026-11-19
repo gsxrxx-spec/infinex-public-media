@@ -1,0 +1,28 @@
+name: INFINEX - publicar en Facebook el carrusel verificado del 18-11-2026
+on:
+  push:
+    paths:
+      - '.github/workflows/infinex_facebook_backfill_20261118.yml'
+      - 'scripts/infinex_facebook_backfill_20261118.py'
+permissions:
+  contents: write
+concurrency:
+  group: infinex-fb-backfill-20261118
+  cancel-in-progress: false
+jobs:
+  crosspost:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+      INFINEX_FB_PAGE_TOKEN: ${{ secrets.INFINEX_FB_PAGE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=11.0,<13'
+      - name: Publicar solo si origen exacto, destino correcto y sin duplicado
+        run: python scripts/infinex_facebook_backfill_20261118.py
