@@ -31,7 +31,14 @@ def main():
         raise RuntimeError("FACEBOOK_SECRET_NOT_CONFIGURED")
     identity = fetch("me?fields=id,name", token)
     if str(identity.get("id")) != EXPECTED_PAGE:
-        raise RuntimeError("TOKEN_IS_NOT_EXPECTED_PAGE_TOKEN")
+        print("TOKEN_IS_USER_NOT_PAGE")
+        accounts = fetch("me/accounts?fields=id,name,tasks,access_token&limit=50", token)
+        candidates = [p for p in accounts.get("data", [])
+                      if str(p.get("id")) == EXPECTED_PAGE]
+        print("TARGET_PAGE_VISIBLE_TO_USER_TOKEN", bool(candidates))
+        print("TARGET_PAGE_TOKEN_AVAILABLE_IN_META",
+              bool(candidates and len(candidates[0].get("access_token", "")) > 50))
+        raise RuntimeError("REPLACE_GITHUB_SECRET_WITH_TARGET_PAGE_TOKEN")
     print("FACEBOOK_PAGE_IDENTITY_OK")
     page = fetch(EXPECTED_PAGE + "?fields=id,name", token)
     if str(page.get("id")) != EXPECTED_PAGE:
