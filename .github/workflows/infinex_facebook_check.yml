@@ -1,4 +1,4 @@
-# Nueva comprobacion sin publicar tras rotacion del secreto de Facebook, 19-11-2026.
+# Nueva comprobacion sin publicar tras segunda rotacion del secreto de Facebook, 19-11-2026.
 name: INFINEX - verificacion segura Facebook (sin publicar)
 on:
   push:
