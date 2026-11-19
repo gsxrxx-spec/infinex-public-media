@@ -1,0 +1,28 @@
+name: INFINEX - prueba premium puertas metalicas a medida 19-11-2026
+on:
+  push:
+    paths:
+      - '.github/workflows/infinex_premium_doors_trial_20261119.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: infinex-instagram-diario
+  cancel-in-progress: false
+jobs:
+  publish_trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+    steps:
+      - name: Obtener contenido validado
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Publicar una sola vez y verificar permalink Instagram
+        run: python scripts/infinex_publish_premium_puertas_trial.py

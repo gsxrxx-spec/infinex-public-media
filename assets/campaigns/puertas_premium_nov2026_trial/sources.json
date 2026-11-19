@@ -1,0 +1,28 @@
+{
+  "campaign": "INFINEX-PUERTAS-PREMIUM-TRIAL-20261119",
+  "theme": "puertas_metalicas",
+  "destination": "infinex_2025",
+  "license": "https://www.pexels.com/license/",
+  "not_actual_infinex_works": true,
+  "logo_sha256": "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
+  "images": [
+    {
+      "path": "assets/campaigns/puertas_premium_nov2026_trial/01.jpg",
+      "sha256": "8eee43a9ee779d7a800cfb46393a176e5a03eeac5564143a8836fc6b79cbf68c",
+      "source_id": "14499728",
+      "source_page": "https://www.pexels.com/photo/view-of-a-modern-house-with-flowers-on-a-balcony-and-black-garage-door-14499728/"
+    },
+    {
+      "path": "assets/campaigns/puertas_premium_nov2026_trial/02.jpg",
+      "sha256": "e3a5e12cac91525770b2381ca0e9af8a65fe57826033a066277e988e5bcabcbe",
+      "source_id": "34190707",
+      "source_page": "https://www.pexels.com/photo/minimalistic-black-door-on-urban-street-34190707/"
+    },
+    {
+      "path": "assets/campaigns/puertas_premium_nov2026_trial/03.jpg",
+      "sha256": "545a42c8f42891fb2c95f8a8582abd76dfe62e3c0497c5026662b7a5a60bba2d",
+      "source_id": "28384143",
+      "source_page": "https://www.pexels.com/photo/modern-industrial-garage-door-with-number-49-28384143/"
+    }
+  ]
+}
