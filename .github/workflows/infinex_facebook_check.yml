@@ -1,0 +1,26 @@
+name: INFINEX - verificacion segura Facebook (sin publicar)
+on:
+  push:
+    paths:
+      - '.github/workflows/infinex_facebook_check.yml'
+      - 'scripts/infinex_fb_check.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  facebook_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      INFINEX_FB_PAGE_TOKEN: ${{ secrets.INFINEX_FB_PAGE_TOKEN }}
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verificar pagina INFINEX sin publicar
+        run: python scripts/infinex_fb_check.py
