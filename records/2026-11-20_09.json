@@ -3,7 +3,7 @@
   "slot": "09",
   "target": "infinex_2025",
   "account_id": "17841435427297631",
-  "status": "PUBLISHING_RESULT_UNCERTAIN_NO_RETRY",
+  "status": "PUBLISHED_VERIFIED",
   "caption": "INFINEX | Ideas en hierro. Soluciones reales. 🟠\n\nTu entrada y tu espacio exterior pueden ganar personalidad con un cerramiento metálico pensado para ti. 🔶\n\n¿Prefieres más privacidad, líneas modernas o un diseño clásico? En INFINEX trabajamos vallas y cerramientos metálicos a medida, adaptados al espacio y al acabado que quieras.\n\nEscríbenos, enséñanos tu idea y pide presupuesto sin compromiso.\n\n#INFINEX #CerramientosMetalicos #VallasMetalicas #Metalisteria\n\n📷 Fotografías ilustrativas de archivo (Pexels). No son obras ejecutadas por INFINEX.\n\n📅 20/11/2026 · 09:00",
   "images": [
     {
@@ -19,7 +19,7 @@
       "sha256": "fc282b6ad64821bd0ae5ea4ec9b38ddf384af1398d06c991d46cde48f6eb13ab"
     }
   ],
-  "media_id": null,
+  "media_id": "18122602081982958",
   "children": [
     "18113937185180910",
     "18113937203180910",
@@ -28,5 +28,7 @@
   "creation_id": "18113937242180910",
   "publish_attempt_started": true,
   "attempt_count": 1,
-  "source": "Pexels; illustrative photos, not INFINEX jobs"
+  "source": "Pexels; illustrative photos, not INFINEX jobs",
+  "permalink": "https://www.instagram.com/p/Df9TdJjF6v-/",
+  "timestamp": "2026-11-20T09:11:42+0000"
 }
