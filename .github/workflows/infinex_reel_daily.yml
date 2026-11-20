@@ -6,6 +6,7 @@ on:
       - '.github/workflows/infinex_reel_daily.yml'
       - 'scripts/infinex_reel_morning.py'
       - 'assets/reels/**/sources.json'
+      - 'ops/reel_clock_ping.json'
   schedule:
     - cron: '0 9 * * *'
       timezone: 'Europe/Madrid'
@@ -38,6 +39,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Validar cola, temas, fuentes y ausencia de duplicados
+        run: python tests/test_infinex_morning_reels.py
       - name: Verificacion editorial sin publicar
         run: python scripts/infinex_reel_morning.py dry_run
       - name: Publicar Reel verificado solo cuando corresponda

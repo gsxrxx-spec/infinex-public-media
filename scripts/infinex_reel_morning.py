@@ -33,7 +33,7 @@ CAPTIONS={
     ),
     "puertas":(
         "Una entrada puede cambiar por completo el aspecto de tu casa. 🚪🟠\n\n"
-        "Diseño, medidas personalizadas, cerramientos y acabados: en INFINEX "
+        "Diseño, medidas personalizadas, materiales y acabados: en INFINEX "
         "estudiamos cada puerta metálica para encontrar una solución adaptada a tu espacio.\n\n"
         "¿Ya tienes una idea? Escríbenos y pide presupuesto sin compromiso.\n\n"
         "🎬 Vídeo ilustrativo generado con IA. No muestra trabajos reales de INFINEX.\n\n"
@@ -41,7 +41,7 @@ CAPTIONS={
     ),
     "cerramientos":(
         "Un cerramiento puede aportar privacidad y transformar la entrada. 🟠\n\n"
-        "Vallas, puertas correderas y otras opciones metálicas: "
+        "Vallas, paneles y otras opciones metálicas de separación: "
         "en INFINEX estudiamos medidas, diseño y acabados según el espacio disponible.\n\n"
         "Cuéntanos lo que necesitas y pide presupuesto sin compromiso.\n\n"
         "🎬 Vídeo ilustrativo generado con IA. No representa una obra real de INFINEX.\n\n"
