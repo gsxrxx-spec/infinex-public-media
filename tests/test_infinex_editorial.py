@@ -32,7 +32,7 @@ for offset in range(8):
             assert len({str(p["id"]) for _,p in chosen})==3
             print("EDITORIAL_SLOT_FRESH_IMAGES",m.DATE,slot,theme,3)
         except RuntimeError as exc:
-            assert str(exc).startswith("EDITORIAL_NEEDS_THREE_NEW_APPROVED_PHOTOS_"),str(exc)
+            assert str(exc).startswith(("EDITORIAL_NEEDS_THREE_NEW_APPROVED_PHOTOS_","EDITORIAL_NEEDS_MORE_NEW_PHOTOS_")),str(exc)
             chosen=[]
             print("EDITORIAL_SLOT_BLOCKED_NEEDS_FRESH_PHOTOS",m.DATE,slot,theme)
         caption=m.caption_for(chosen)

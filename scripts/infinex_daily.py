@@ -15,10 +15,12 @@ from datetime import datetime, date, time as dtime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-from infinex_editorial_policy import TOPICS, assert_not_consecutive
+from infinex_editorial_policy import TOPICS, assert_not_consecutive, topic_from_caption
+from infinex_autorepair import alternate_topics, unique_headlines
 from infinex_weekly_plan import START_DATE, is_scheduled
 from infinex_carousel_quality import (REGISTRY,headings_for,validate_headings,
-    used_photos,ensure_unique,reserve,confirmed_reserved)
+    used_photos,ensure_unique,reserve,confirmed_reserved,
+    file_image_signature,hamming)
 
 BASE = Path(__file__).resolve().parents[1]
 IG_ID = "17841435427297631"
@@ -96,6 +98,8 @@ def font(size,bold=False):
     return ImageFont.truetype(FONT_BOLD if bold else FONT_REGULAR,size)
 
 TOPIC_ROTATION = TOPICS
+EDITORIAL_THEME = None
+EDITORIAL_TITLES = None
 
 # Dos datos practicos por diapositiva, sin mezclar servicios ni saturar diseño.
 SLIDE_DETAILS = {
@@ -122,6 +126,8 @@ SLIDE_DETAILS = {
 }
 
 def topic_for_slot():
+    if EDITORIAL_THEME is not None:
+        return EDITORIAL_THEME
     epoch = (DATE-date(2026,11,19)).days
     if epoch < 0: raise RuntimeError("DATE_BEFORE_EDITORIAL_START")
     edition = epoch*2 + (0 if SLOT=="09" else 1)
@@ -142,27 +148,62 @@ def topic_for_slot():
             intended=TOPIC_ROTATION[(edition+1)%len(TOPIC_ROTATION)]
     return intended
 
-def photo_selection():
+def photo_candidates(theme):
+    """Return all eligible fresh licensed sources, for replacement retries."""
     data=json.loads(BANK.read_text(encoding="utf-8"))
     if data.get("license")!="https://www.pexels.com/license/":
         raise RuntimeError("UNVERIFIED_IMAGE_LICENSE")
-    theme=topic_for_slot()
     groups={"puertas":"gates","escaleras":"structures",
             "cerramientos":"gates","soldadura":"welding"}
-    # Never wrap around to already published photographs. A depleted stock
-    # bank is a reason to block, not a reason to repeat a previous photo.
     group=groups[theme]
     used,_,_,_=used_photos(BASE,exclude=MEDIA_DIR/"sources.json")
-    candidates=[p for p in data[group] if str(p["id"]) not in used]
-    candidates=[p for p in candidates if not any(
-        word in p.get("page","").lower()
-        for word in ("rusty","creepy","deteriorated","damaged"))]
-    if len(candidates)<3:
-        raise RuntimeError("EDITORIAL_NEEDS_THREE_NEW_APPROVED_PHOTOS_"+theme.upper())
+    candidates=[p for p in data[group]
+                if str(p["id"]) not in used and not any(
+                    word in (p.get("page","")+" "+p.get("title","")).lower()
+                    for word in ("rusty","creepy","deteriorated","damaged","broken","abandoned"))]
+    # Rotate candidates but keep the entire approved pool available if an
+    # individual photo turns out unsuitable or cannot be downloaded.
+    if not candidates:
+        return []
     edition=(DATE-date(2026,11,19)).days*2 + (0 if SLOT=="09" else 1)
-    # Rotate fresh stock without reusing any used source ID.
     offset=(edition//len(TOPIC_ROTATION))%len(candidates)
-    return [(group,candidates[(offset+i)%len(candidates)]) for i in range(3)]
+    return [(group,candidates[(offset+i)%len(candidates)])
+            for i in range(len(candidates))]
+
+def photo_selection():
+    selected=photo_candidates(topic_for_slot())
+    if len(selected)<3:
+        raise RuntimeError("EDITORIAL_NEEDS_MORE_NEW_PHOTOS_"+topic_for_slot().upper())
+    return selected[:3]
+
+def prepare_editorial_plan(previous_topic=None,skip_topics=()):
+    """Search another topic/copy before accepting an editorial failure.
+
+    All candidates must still be unused, Pexels-licensed, and on topic.
+    Existing Meta publish attempts must never enter this regeneration path.
+    """
+    global EDITORIAL_THEME,EDITORIAL_TITLES
+    EDITORIAL_THEME=None
+    desired=topic_for_slot()
+    edition=(DATE-date(2026,11,19)).days*2+(0 if SLOT=="09" else 1)
+    _,historic_titles,_,_=used_photos(BASE,exclude=MEDIA_DIR/"sources.json")
+    for theme in alternate_topics(desired,previous_topic):
+        if theme in skip_topics:continue
+        EDITORIAL_THEME=theme
+        try:
+            if len(photo_candidates(theme))<3:
+                log("EDITORIAL_TRY_ANOTHER_TOPIC_NO_NEW_PHOTOS",theme)
+                continue
+            titles=unique_headlines(theme,edition,historic_titles)
+            EDITORIAL_TITLES=tuple(titles)
+            log("EDITORIAL_REPLACEMENT_READY",theme,"new_photo_options",
+                len(photo_candidates(theme)),"headlines",3)
+            return
+        except RuntimeError as exc:
+            log("EDITORIAL_REJECTED_RETRY_NEXT_TOPIC",theme,str(exc)[:85])
+    EDITORIAL_THEME=None
+    EDITORIAL_TITLES=None
+    raise RuntimeError("EDITORIAL_REPLENISH_LICENSED_PHOTOS_BEFORE_PUBLISHING")
 
 def caption_for(chosen):
     # Cada carrusel vende un servicio concreto y termina con una acción.
@@ -231,7 +272,7 @@ def render_slide(photo_image,category,number,out):
         "soldadura":("Trabajo pensado para ti","Repara, refuerza o adapta","Cada proyecto es diferente"),
     }
     edition=(DATE-date(2026,11,19)).days*2+(0 if SLOT=="09" else 1)
-    title=headings_for(topic_for_slot(),edition)[number-1]
+    title=(EDITORIAL_TITLES or headings_for(topic_for_slot(),edition))[number-1]
     sub=subtitles[topic_for_slot()][number-1]
     d.text((870,82),f"{number:02d} / 03",font=font(29,True),fill=WHITE,stroke_width=1,stroke_fill=BLACK)
     d.rectangle((60,952,212,964),fill=ORANGE)
@@ -252,23 +293,47 @@ def render_slide(photo_image,category,number,out):
     canvas.save(out,"JPEG",quality=92,subsampling=0,optimize=True)
 
 def build():
-    chosen=photo_selection()
     if not LOGO.exists(): raise RuntimeError("LOGO_NOT_FOUND")
+    pool=photo_candidates(topic_for_slot())
+    if len(pool)<3:
+        raise RuntimeError("EDITORIAL_AUTOREPAIR_NO_THREE_FRESH_STOCK_PHOTOS")
+    _,_,previous_sha,previous_looks=used_photos(BASE,exclude=MEDIA_DIR/"sources.json")
+    chosen=[]
+    rendered_sha=[]
+    rendered_looks=[]
     MEDIA_DIR.mkdir(parents=True,exist_ok=True)
     edition=(DATE-date(2026,11,19)).days*2+(0 if SLOT=="09" else 1)
-    titles=headings_for(topic_for_slot(),edition)
+    titles=EDITORIAL_TITLES or headings_for(topic_for_slot(),edition)
     manifest={"date":DAY_KEY,"slot":SLOT,"destination":IG_USERNAME,"license":"https://www.pexels.com/license/",
               "not_actual_infinex_works":True,"titles":list(titles),
               "sources":[],"images":[]}
-    for i,(category,photo) in enumerate(chosen,1):
-        image=download_photo(photo)
-        out=MEDIA_DIR/f"{i:02}.jpg"
-        render_slide(image,category,i,out)
-        if out.stat().st_size<50000:raise RuntimeError("JPG_TOO_SMALL")
-        manifest["sources"].append({"id":photo["id"],"category":category,
-                                     "page":photo["page"],"author":photo.get("author","Pexels")})
-        manifest["images"].append({"path":str(out.relative_to(BASE)).replace("\\","/"),
-                                    "sha256":hashlib.sha256(out.read_bytes()).hexdigest()})
+    for category,photo in pool:
+        if len(chosen)>=3:break
+        next_number=len(chosen)+1
+        out=MEDIA_DIR/f"{next_number:02}.jpg"
+        try:
+            image=download_photo(photo)
+            render_slide(image,category,next_number,out)
+            if out.stat().st_size<50000:raise RuntimeError("JPG_TOO_SMALL")
+            sha=hashlib.sha256(out.read_bytes()).hexdigest()
+            visual=file_image_signature(out)
+            if sha in previous_sha or sha in rendered_sha or any(
+                hamming(visual,old)<=3 for old in [*previous_looks,*rendered_looks]):
+                raise RuntimeError("EDITORIAL_AUTOREPAIR_SIMILAR_OR_REUSED_VISUAL")
+            chosen.append((category,photo))
+            rendered_sha.append(sha)
+            rendered_looks.append(visual)
+            manifest["sources"].append({
+                "id":photo["id"],"category":category,
+                "page":photo["page"],"author":photo.get("author","Pexels")})
+            manifest["images"].append({
+                "path":str(out.relative_to(BASE)).replace("\\","/"),"sha256":sha})
+        except (RuntimeError,ValueError,OSError) as exc:
+            log("EDITORIAL_REPLACE_IMAGE_WITH_NEXT_CANDIDATE",
+                str(photo.get("id","?")),str(exc)[:100])
+            continue
+    if len(chosen)!=3:
+        raise RuntimeError("EDITORIAL_AUTOREPAIR_CANDIDATES_EXHAUSTED_"+topic_for_slot().upper())
     (MEDIA_DIR/"sources.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     return chosen,manifest
 
@@ -282,7 +347,7 @@ def review_before_publish(chosen,manifest,caption):
         raise RuntimeError("CONTENT_REPEATED_PHOTO")
     validate_headings(manifest.get("titles"))
     edition=(DATE-date(2026,11,19)).days*2+(0 if SLOT=="09" else 1)
-    if manifest.get("titles")!=list(headings_for(topic_for_slot(),edition)):
+    if manifest.get("titles")!=list(EDITORIAL_TITLES or headings_for(topic_for_slot(),edition)):
         raise RuntimeError("EDITORIAL_TITLES_DO_NOT_MATCH_RENDERED_SLIDES")
     ensure_unique(BASE,manifest,exclude=MEDIA_DIR/"sources.json")
     if (len(manifest.get("images",[]))!=3 or len(manifest.get("sources",[]))!=3 or
@@ -391,19 +456,64 @@ def check_latest_topic():
         "next", topic_for_slot())
 
 
+def previous_instagram_topic():
+    recent=api(IG_ID+"/media?fields=id,caption,media_type,timestamp&limit=10").get("data")
+    if not isinstance(recent,list):
+        raise RuntimeError("INFINEX_INSTAGRAM_MEDIA_UNAVAILABLE")
+    if not recent:
+        return None
+    result=topic_from_caption(recent[0].get("caption",""))
+    if result is None:
+        raise RuntimeError("INFINEX_PREVIOUS_POST_TOPIC_NEEDS_REVIEW")
+    return result
+
+def regenerate_until_approved(previous_topic=None):
+    """Replace unsuitable photographs, claims, titles or even the subject.
+
+    This routine never disables originality/legal/brand checks. A true lack
+    of usable stock or broken Meta access remains a technical error.
+    """
+    failed=set()
+    for _ in range(len(TOPICS)):
+        try:
+            prepare_editorial_plan(previous_topic,failed)
+        except RuntimeError:
+            break
+        theme=topic_for_slot()
+        try:
+            chosen,manifest=build()
+            caption=caption_for(chosen)
+            review_before_publish(chosen,manifest,caption)
+            log("EDITORIAL_AUTOREPAIR_FINAL_QA_PASSED",theme,
+                "source_photos",len(chosen),"titles",len(manifest["titles"]))
+            return chosen,manifest,caption
+        except RuntimeError as exc:
+            if not str(exc).startswith(("EDITORIAL_","CONTENT_","JPG_","STOCK_")):
+                raise
+            failed.add(theme)
+            log("EDITORIAL_AUTOREPAIR_REGENERATE_NEXT_PROPOSAL",
+                theme,str(exc)[:115])
+    raise RuntimeError("EDITORIAL_REPLENISH_OR_REVIEW_CANDIDATES_REQUIRED")
+
+def find_published_for_slot():
+    date_line="📅 "+DATE.strftime("%d/%m/%Y")+" · "+SLOT_TIME
+    for item in api(IG_ID+"/media?fields=id,caption,media_type,permalink&limit=100").get("data",[]):
+        if date_line in (item.get("caption") or "") and item.get("media_type")=="CAROUSEL_ALBUM":
+            return item
+    return None
+
 def dry_run():
     if DATE>=START_DATE and not is_scheduled(DATE,SLOT,'carousel'):
         log('INFINEX_CAROUSEL_NOT_SCHEDULED',DAY_KEY,SLOT)
         return
     preflight()
-    chosen,manifest=build()
-    review_before_publish(chosen,manifest,caption_for(chosen))
+    chosen,manifest,caption=regenerate_until_approved(previous_instagram_topic())
     log("DRY_RUN_OK","date",DAY_KEY,"slot",SLOT,"images",len(manifest["images"]))
     log("SAFETY","NO_POST","NO_COMMIT","TOKEN_NOT_PRINTED")
     for source in manifest["sources"]:log("LICENSED_SOURCE",source["page"])
 
 def publish():
-    # Weekly policy: exactly five carousels and two Reels, one post/day.
+    # Definitive policy: twelve carousels and two Reels, two slots every day.
     if DATE>=START_DATE and not is_scheduled(DATE,SLOT,"carousel"):
         log("INFINEX_CAROUSEL_NOT_SCHEDULED",DAY_KEY,SLOT)
         return
@@ -412,7 +522,6 @@ def publish():
         return
     preflight()
     # Do not require new stock to verify/reconcile an already-published slot.
-    expected_caption=caption_for([])
     previous=(json.loads(RECORD_FILE.read_text(encoding="utf-8"))
               if RECORD_FILE.exists() else None)
     if previous and (previous.get("do_not_republish") or
@@ -422,6 +531,25 @@ def publish():
     if previous and previous.get("status")=="PUBLISHED_VERIFIED":
         log("SKIPPED_ALREADY_VERIFIED",DAY_KEY,SLOT,previous.get("permalink",""))
         return
+    # Check for an actual posted slot before generating other images/copy.
+    # This protects against replay after a lost local ledger or crash.
+    if not previous:
+        existing=find_published_for_slot()
+        if existing:
+            published_caption=existing.get("caption","")
+            post=verify_post(existing["id"],published_caption)
+            state={"date":DAY_KEY,"slot":SLOT,"target":IG_USERNAME,
+                   "account_id":IG_ID,"caption":published_caption,
+                   "status":"PUBLISHED_VERIFIED","media_id":str(post["id"]),
+                   "permalink":post["permalink"],"timestamp":post.get("timestamp")}
+            atomic_record(state)
+            commit([str(RECORD_FILE.relative_to(BASE))],
+                   "INFINEX reconciled existing slot "+DAY_KEY+" "+SLOT)
+            log("RECONCILED_EXISTING_SLOT",post["permalink"])
+            return
+        chosen,manifest,expected_caption=regenerate_until_approved(previous_instagram_topic())
+    else:
+        expected_caption=previous.get("caption") or caption_for([])
     # Reconcile from Instagram before any new publish, including after crashes.
     found=find_today(expected_caption)
     if found:
@@ -444,8 +572,9 @@ def publish():
             log("BLOCKED_UNCERTAIN_POST_NO_DUPLICATE",DAY_KEY,SLOT)
             raise RuntimeError("UNCONFIRMED_META_PUBLISH_NO_AUTOMATIC_RETRY")
         log("RESUMING_SAFE_PRE_PUBLISH_FAILURE",DAY_KEY,SLOT)
-    chosen,manifest=build()
-    review_before_publish(chosen,manifest,expected_caption)
+    if previous:
+        chosen,manifest=build()
+        review_before_publish(chosen,manifest,expected_caption)
     # Reserve each source and every headline permanently before any Meta upload.
     reserved=reserve(BASE,manifest,DAY_KEY,SLOT,MEDIA_DIR/"sources.json")
     state={"date":DAY_KEY,"slot":SLOT,"target":IG_USERNAME,"account_id":IG_ID,
