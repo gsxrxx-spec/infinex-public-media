@@ -1,0 +1,44 @@
+name: INFINEX - Reel 09 Europe Madrid, recuperacion segura
+
+on:
+  push:
+    paths:
+      - '.github/workflows/infinex_reel_daily.yml'
+      - 'scripts/infinex_reel_morning.py'
+      - 'assets/reels/**/sources.json'
+  schedule:
+    - cron: '0 9 * * *'
+      timezone: 'Europe/Madrid'
+    # Reintentos no duplicados por si GitHub retrasa o pierde una ejecucion
+    - cron: '9,19,29,39,49 9 * * *'
+      timezone: 'Europe/Madrid'
+    - cron: '13,33,53 10 * * *'
+      timezone: 'Europe/Madrid'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: infinex-instagram-diario
+  cancel-in-progress: false
+
+jobs:
+  reel_09:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
+    steps:
+      - name: Recuperar proyecto
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verificacion editorial sin publicar
+        run: python scripts/infinex_reel_morning.py dry_run
+      - name: Publicar Reel verificado solo cuando corresponda
+        run: python scripts/infinex_reel_morning.py publish

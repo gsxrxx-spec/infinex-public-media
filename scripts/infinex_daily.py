@@ -377,6 +377,11 @@ def dry_run():
     for source in manifest["sources"]:log("LICENSED_SOURCE",source["page"])
 
 def publish():
+    # Desde el 20/11 el turno de las 09:00 corresponde a REELS,
+    # gestionado por infinex_reel_morning.py, nunca por este carrusel.
+    if SLOT=="09" and DATE>=date(2026,11,20):
+        log("MORNING_REEL_MANAGED_SEPARATELY",DAY_KEY,SLOT)
+        return
     preflight()
     chosen=photo_selection()
     expected_caption=caption_for(chosen)
@@ -521,6 +526,9 @@ def recover():
         if day<start_day:
             break
         for slot in ("09","17"):
+            if slot=="09" and day>=date(2026,11,20):
+                log("RECOVERY_MORNING_REEL_SEPARATE",day.isoformat())
+                continue
             due=datetime.combine(day,dtime(int(slot),0),tzinfo=TZ)
             if now<due:
                 continue
