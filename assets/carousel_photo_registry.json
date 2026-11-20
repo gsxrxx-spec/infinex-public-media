@@ -131,6 +131,30 @@
       ],
       "titles": [],
       "status": "HISTORICAL_LOCKED_UNKNOWN_ORIGINAL_SOURCE_ID"
+    },
+    {
+      "key": "2026-11-20_17",
+      "source_ids": [
+        "22863133",
+        "29386092",
+        "5759597"
+      ],
+      "image_sha256": [
+        "91221ddf494ac6c2a686df0986ffd4e949fcca2e6d80ce0055106a2105c50706",
+        "893b02d1c76eb48aafdebf1d304e7bec768106aec11699b8ed8e2066fcc4f8cf",
+        "f4dff6c8e21cc3c9e1040deeb88b57a8cbd7bc9b3b5e4816b934d481d82c189c"
+      ],
+      "hero_dhash": [
+        "b9a9a9a9bdbd7969",
+        "260c4c0e0e833b07",
+        "e7df5b1befb7af9e"
+      ],
+      "titles": [
+        "EL HIERRO TIENE SOLUCIÓN",
+        "UNIONES QUE IMPORTAN",
+        "CUÉNTANOS TU PROYECTO"
+      ],
+      "status": "RESERVED_NO_REUSE"
     }
   ]
 }

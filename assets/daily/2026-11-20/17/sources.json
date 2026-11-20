@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-20",
+  "slot": "17",
+  "destination": "infinex_2025",
+  "license": "https://www.pexels.com/license/",
+  "not_actual_infinex_works": true,
+  "titles": [
+    "EL HIERRO TIENE SOLUCIÓN",
+    "UNIONES QUE IMPORTAN",
+    "CUÉNTANOS TU PROYECTO"
+  ],
+  "sources": [
+    {
+      "id": "22863133",
+      "category": "welding",
+      "page": "https://www.pexels.com/photo/a-person-wearing-protective-clothing-welding-in-a-workshop-22863133/",
+      "author": "Gabriel Rissi"
+    },
+    {
+      "id": "29386092",
+      "category": "welding",
+      "page": "https://www.pexels.com/photo/professional-welding-with-sparking-metalwork-29386092/",
+      "author": "Critical Smith"
+    },
+    {
+      "id": "5759597",
+      "category": "welding",
+      "page": "https://www.pexels.com/photo/a-person-welding-a-metal-5759597/",
+      "author": "Uğur Bozdoğan"
+    }
+  ],
+  "images": [
+    {
+      "path": "assets/daily/2026-11-20/17/01.jpg",
+      "sha256": "91221ddf494ac6c2a686df0986ffd4e949fcca2e6d80ce0055106a2105c50706"
+    },
+    {
+      "path": "assets/daily/2026-11-20/17/02.jpg",
+      "sha256": "893b02d1c76eb48aafdebf1d304e7bec768106aec11699b8ed8e2066fcc4f8cf"
+    },
+    {
+      "path": "assets/daily/2026-11-20/17/03.jpg",
+      "sha256": "f4dff6c8e21cc3c9e1040deeb88b57a8cbd7bc9b3b5e4816b934d481d82c189c"
+    }
+  ]
+}
