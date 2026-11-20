@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-20",
+  "slot": "09",
+  "destination": "infinex_2025",
+  "license": "https://www.pexels.com/license/",
+  "not_actual_infinex_works": true,
+  "sources": [
+    {
+      "id": "18379563",
+      "category": "gates",
+      "page": "https://www.pexels.com/photo/tall-metal-fence-18379563/",
+      "author": "mehmet"
+    },
+    {
+      "id": "7540017",
+      "category": "gates",
+      "page": "https://www.pexels.com/photo/steel-gate-of-fence-7540017/",
+      "author": "Pexels"
+    },
+    {
+      "id": "26050773",
+      "category": "gates",
+      "page": "https://www.pexels.com/photo/metal-folding-gate-26050773/",
+      "author": "Pexels"
+    }
+  ],
+  "images": [
+    {
+      "path": "assets/daily/2026-11-20/09/01.jpg",
+      "sha256": "db3db5f44d8dceff243d3dfe7270bd70dc795aaf86755c937b33b6a70e316622"
+    },
+    {
+      "path": "assets/daily/2026-11-20/09/02.jpg",
+      "sha256": "b0a3391673d17bffaf58ccd67efc40843641a9ca7553f4c22a956b3e4349cc14"
+    },
+    {
+      "path": "assets/daily/2026-11-20/09/03.jpg",
+      "sha256": "fc282b6ad64821bd0ae5ea4ec9b38ddf384af1398d06c991d46cde48f6eb13ab"
+    }
+  ]
+}
