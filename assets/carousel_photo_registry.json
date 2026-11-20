@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "policy": "Every source photo is one-time only; all historical reservations survive deletions.",
+  "entries": [
+    {
+      "key": "historical:assets/campaigns/puertas_20261119/sources.json",
+      "source_ids": [
+        "18379563",
+        "4671453",
+        "9163098"
+      ],
+      "image_sha256": [
+        "5bc13479eb028e8d7dcaf1b3bb2bfe9811ff8e398a93112e4acc0b2eac011163",
+        "6a2e505786ef02e72d709900ae503c1969d8b77afd17f4640c9d9cab8766bb24",
+        "79dd56984022fbb28200030bad290c5049303e7dab6181babfd01abbbf2595ee"
+      ],
+      "hero_dhash": [
+        "4b4b4b4949494949",
+        "8694958495969585",
+        "636371f1b1712535"
+      ],
+      "titles": [],
+      "status": "HISTORICAL_LOCKED"
+    },
+    {
+      "key": "historical:assets/campaigns/puertas_premium_nov2026_trial/sources.json",
+      "source_ids": [
+        "14499728",
+        "34190707",
+        "28384143"
+      ],
+      "image_sha256": [
+        "8eee43a9ee779d7a800cfb46393a176e5a03eeac5564143a8836fc6b79cbf68c",
+        "e3a5e12cac91525770b2381ca0e9af8a65fe57826033a066277e988e5bcabcbe",
+        "545a42c8f42891fb2c95f8a8582abd76dfe62e3c0497c5026662b7a5a60bba2d"
+      ],
+      "hero_dhash": [
+        "1c78d8a8a9f9a9b9",
+        "40404444c08040e8",
+        "5557b7b7dd53939a"
+      ],
+      "titles": [],
+      "status": "HISTORICAL_LOCKED"
+    },
+    {
+      "key": "historical:assets/daily/2026-11-19/09/sources.json",
+      "source_ids": [
+        "31302980",
+        "28852847",
+        "5919806"
+      ],
+      "image_sha256": [
+        "f174363deb2b1a1700890ed0345de8f7365819c3179d4c09956458a8cc9d8759",
+        "75f7c31e5e843cbd746b7685d690f20680d2160e3d1b575cd471a9df53c18b94",
+        "0c0bf7d912f149e7c7ff2dcc6b2d01662f282df00e4661b60f247a680245a28c"
+      ],
+      "hero_dhash": [
+        "277f7c3e1418cce6",
+        "0f060c8d5a0c2319",
+        "5d36c63759494c74"
+      ],
+      "titles": [],
+      "status": "HISTORICAL_LOCKED"
+    },
+    {
+      "key": "historical:assets/daily/2026-11-19/17/sources.json",
+      "source_ids": [
+        "31302980",
+        "8734898",
+        "3483789"
+      ],
+      "image_sha256": [
+        "8eff20c1d6f1f242d1f14e6d15a52025905f195abe101a661b2d9dc2f7919f1e",
+        "cab630b9c2517950086126504d558303f3e66a51d0a7e7873991d76f75545330",
+        "c3b1c9bbc7b9e6e3afe6ca9d7a28aa15e7528364544ffe337a45b359b3823a0e"
+      ],
+      "hero_dhash": [
+        "277f7c3e1418cce6",
+        "1d2c2c8e4f8fc7df",
+        "fab6a2e4d5a94372"
+      ],
+      "titles": [],
+      "status": "HISTORICAL_LOCKED"
+    },
+    {
+      "key": "historical:assets/daily/2026-11-20/09/sources.json",
+      "source_ids": [
+        "18379563",
+        "7540017",
+        "26050773"
+      ],
+      "image_sha256": [
+        "db3db5f44d8dceff243d3dfe7270bd70dc795aaf86755c937b33b6a70e316622",
+        "b0a3391673d17bffaf58ccd67efc40843641a9ca7553f4c22a956b3e4349cc14",
+        "fc282b6ad64821bd0ae5ea4ec9b38ddf384af1398d06c991d46cde48f6eb13ab"
+      ],
+      "hero_dhash": [
+        "495b4b5949494949",
+        "4a4a4a4a5a5a4a4a",
+        "242464342c092929"
+      ],
+      "titles": [],
+      "status": "HISTORICAL_LOCKED"
+    },
+    {
+      "key": "historical:assets/2026-11-18",
+      "source_ids": [],
+      "image_sha256": [
+        "d2eed533dfca88e695dda54468aacbf84b45fc3d27d8b1dac22bc0ee2c14b666",
+        "7982d6e99912d9a408463392e42b54ed5753a8be1ae781e208d4a67f9e5767a1"
+      ],
+      "hero_dhash": [
+        "0210a7eb35b54801",
+        "8867b7979e40f070"
+      ],
+      "titles": [],
+      "status": "HISTORICAL_LOCKED_UNKNOWN_ORIGINAL_SOURCE_ID"
+    },
+    {
+      "key": "historical:assets/2026-11-18/visual-b",
+      "source_ids": [],
+      "image_sha256": [
+        "375c1de75d4d1dfb0d381f44654b3287a2ce719fcf5c1df15a065556b62ada57",
+        "8446540c2872f1ee6be32bf646247b472a244f6d79a488939202c03059ccd732",
+        "e0c07d02531278de0204d1f5767e3fe81b584fa500d35a3c5d0124b2733041b4"
+      ],
+      "hero_dhash": [
+        "0f1f830919e9993b",
+        "495b4b5949494949",
+        "27777c3e1418cce6"
+      ],
+      "titles": [],
+      "status": "HISTORICAL_LOCKED_UNKNOWN_ORIGINAL_SOURCE_ID"
+    }
+  ]
+}

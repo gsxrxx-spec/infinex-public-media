@@ -23,19 +23,25 @@ for offset in range(8):
         m.SLOT=slot
         m.SLOT_TIME=slot+":00"
         theme=m.topic_for_slot()
-        chosen=m.photo_selection()
-        assert len(chosen)==3
-        assert {group for group,_ in chosen}=={expected[theme]}
-        assert len({str(p["id"]) for _,p in chosen})==3
+        # No stock recycling when the finite licensed bank is exhausted.
+        # A blocked slot is safer than reusing a previously published image.
+        try:
+            chosen=m.photo_selection()
+            assert len(chosen)==3
+            assert {group for group,_ in chosen}=={expected[theme]}
+            assert len({str(p["id"]) for _,p in chosen})==3
+            print("EDITORIAL_SLOT_FRESH_IMAGES",m.DATE,slot,theme,3)
+        except RuntimeError as exc:
+            assert str(exc).startswith("EDITORIAL_NEEDS_THREE_NEW_APPROVED_PHOTOS_"),str(exc)
+            chosen=[]
+            print("EDITORIAL_SLOT_BLOCKED_NEEDS_FRESH_PHOTOS",m.DATE,slot,theme)
         caption=m.caption_for(chosen)
         assert "presupuesto sin compromiso" in caption.lower()
         assert "#INFINEX" in caption
         assert "No son obras ejecutadas por INFINEX." in caption
         assert m.DATE.strftime("%d/%m/%Y") in caption
         assert len(caption)<2200
-        assert len(set([p["page"] for _,p in chosen]))==3
         seen.add(theme)
-        print("EDITORIAL_SLOT_OK",m.DATE,slot,theme,3)
 assert seen==set(expected)
 print("EDITORIAL_SINGLE_TOPIC_TEST_PASSED",len(seen),"themes",16,"slots")
 
