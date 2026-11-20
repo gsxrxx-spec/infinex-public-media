@@ -15,6 +15,9 @@ on:
       timezone: 'Europe/Madrid'
     - cron: '13,33,53 10 * * *'
       timezone: 'Europe/Madrid'
+    # Recuperacion si el PC estuvo apagado o se perdieron lanzamientos
+    - cron: '17 11-23 * * *'
+      timezone: 'Europe/Madrid'
   workflow_dispatch:
 
 permissions:

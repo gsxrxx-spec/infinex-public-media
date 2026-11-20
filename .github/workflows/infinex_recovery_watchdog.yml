@@ -43,4 +43,5 @@ jobs:
       - name: Recuperar Instagram cuando falte un turno
         run: python scripts/infinex_daily.py recover
       - name: Espejar en Facebook solo despues de verificar Instagram
+        if: ${{ vars.INFINEX_FB_SYNC_ENABLED == 'true' }}
         run: python scripts/infinex_facebook.py recover
