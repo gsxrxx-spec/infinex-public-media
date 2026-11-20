@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "policy": "Never republish used Reel footage, including re-edited versions or videos removed from Instagram.",
+  "used": [
+    {
+      "date": "2026-11-20",
+      "slot": "09",
+      "topic": "escaleras",
+      "media_id": "17915556330484501",
+      "permalink": "https://www.instagram.com/reel/Df9UF1kAGzm/",
+      "video_sha256": "7f023971365b9aed6e282cb0ea3738d35d264c3033a0f0b6ab5b37d41409a1ba",
+      "source_video_sha256": "88ccefea5501a8a980f370e1202a53518bb842a44b0688d779e3cc835c8b532c"
+    }
+  ]
+}

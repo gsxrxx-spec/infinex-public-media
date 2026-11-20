@@ -1,10 +1,14 @@
-name: INFINEX - Reel 09 Europe Madrid, recuperacion segura
+name: INFINEX - 2 Reels semanales en calendario 14 posts
 
 on:
   push:
     paths:
       - '.github/workflows/infinex_reel_daily.yml'
       - 'scripts/infinex_reel_morning.py'
+      - 'scripts/infinex_weekly_plan.py'
+      - 'scripts/infinex_reel_uniqueness.py'
+      - 'assets/reels/NEVER_REUSE.json'
+      - 'tests/test_infinex_morning_reels.py'
       - 'assets/reels/**/sources.json'
       - 'ops/reel_clock_ping.json'
   schedule:
@@ -14,6 +18,13 @@ on:
     - cron: '9,19,29,39,49 9 * * *'
       timezone: 'Europe/Madrid'
     - cron: '13,33,53 10 * * *'
+      timezone: 'Europe/Madrid'
+    # Dos Reels por semana: lunes 09 y jueves 17, previa comprobacion calendario.
+    - cron: '0 17 * * *'
+      timezone: 'Europe/Madrid'
+    - cron: '9,19,39,59 17 * * *'
+      timezone: 'Europe/Madrid'
+    - cron: '13,33 18 * * *'
       timezone: 'Europe/Madrid'
     # Recuperacion si el PC estuvo apagado o se perdieron lanzamientos
     - cron: '17 11-23 * * *'
@@ -28,7 +39,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  reel_09:
+  reels_programados:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
@@ -42,7 +53,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validar cola, temas, fuentes y ausencia de duplicados
+      - name: Validar 12 carruseles, 2 Reels, 14 franjas y prohibir reutilizar vídeo
         run: python tests/test_infinex_morning_reels.py
       - name: Verificacion editorial sin publicar
         run: python scripts/infinex_reel_morning.py dry_run

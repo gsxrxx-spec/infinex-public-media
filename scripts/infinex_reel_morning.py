@@ -8,6 +8,9 @@ from datetime import datetime,date,time as dtime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from infinex_editorial_policy import assert_not_consecutive,TOPICS
+from infinex_weekly_plan import START_DATE, scheduled_posts, is_scheduled, due
+from infinex_reel_uniqueness import validate_unique, caption_reusable_media_item
+from infinex_editorial_policy import topic_from_caption
 
 BASE=Path(__file__).resolve().parents[1]
 ACCOUNT_ID="17841435427297631"
@@ -18,7 +21,8 @@ TZ=ZoneInfo("Europe/Madrid")
 NOW=datetime.now(TZ)
 DAY=NOW.date()
 STAMP=DAY.isoformat()
-LEDGER=BASE/"records"/(STAMP+"_09_reel.json")
+SLOT=next((slot for slot,kind in scheduled_posts(DAY) if kind=="reel"),None)
+LEDGER=BASE/"records"/(STAMP+"_"+(SLOT or "none")+"_reel.json")
 MODE=sys.argv[1] if len(sys.argv)>1 else "publish"
 if MODE not in ("publish","dry_run"):raise SystemExit(2)
 CAPTIONS={
@@ -60,11 +64,11 @@ CAPTIONS={
 def log(*args):print(*args,flush=True)
 
 def load_asset():
-    manifests=list((BASE/"assets"/"reels").glob(STAMP+"_09_*/sources.json"))
+    manifests=list((BASE/"assets"/"reels").glob(STAMP+"_"+SLOT+"_*/sources.json"))
     if len(manifests)!=1:
         raise RuntimeError("INFINEX_REEL_ASSET_NOT_PREAPPROVED_FOR_TODAY")
     manifest=json.loads(manifests[0].read_text(encoding="utf-8"))
-    if (manifest.get("date")!=STAMP or manifest.get("slot")!="09" or
+    if (manifest.get("date")!=STAMP or manifest.get("slot")!=SLOT or
         manifest.get("type")!="REELS" or manifest.get("topic") not in TOPICS or
         manifest.get("illustrative_ai") is not True or
         manifest.get("approved_for_publish") is not True):
@@ -116,10 +120,31 @@ def save(state):
 def commit(message):
     subprocess.run(["git","config","user.name","INFINEX Scheduler"],cwd=BASE,check=True,stdout=subprocess.DEVNULL)
     subprocess.run(["git","config","user.email","infinex-automation@users.noreply.github.com"],cwd=BASE,check=True,stdout=subprocess.DEVNULL)
-    subprocess.run(["git","add","--",str(LEDGER.relative_to(BASE))],cwd=BASE,check=True,stdout=subprocess.DEVNULL)
+    subprocess.run(["git","add","--",str(LEDGER.relative_to(BASE)),
+                    "assets/reels/NEVER_REUSE.json"],cwd=BASE,check=True,stdout=subprocess.DEVNULL)
     if subprocess.run(["git","diff","--cached","--quiet"],cwd=BASE).returncode==0:return
     subprocess.run(["git","commit","-m",message],cwd=BASE,check=True,stdout=subprocess.DEVNULL)
     subprocess.run(["git","push","origin","HEAD:main"],cwd=BASE,check=True,stdout=subprocess.DEVNULL)
+
+def reserve_reel_fingerprint(asset):
+    """Durably mark video/source used *before* the irreversible Meta publish."""
+    target=BASE/"assets/reels/NEVER_REUSE.json"
+    data=json.loads(target.read_text(encoding="utf-8"))
+    if not isinstance(data.get("used"),list):
+        raise RuntimeError("INFINEX_REEL_BLOCKLIST_INVALID")
+    for old in data["used"]:
+        if (old.get("video_sha256")==asset["video_sha256"] or
+            old.get("source_video_sha256")==asset["source_video_sha256"]):
+            raise RuntimeError("INFINEX_REEL_ALREADY_RESERVED_OR_POSTED")
+    data["used"].append({
+        "date":STAMP,"slot":SLOT,"topic":asset["topic"],
+        "video_sha256":asset["video_sha256"],
+        "source_video_sha256":asset["source_video_sha256"],
+        "status":"RESERVED_NO_REUSE"
+    })
+    temp=target.with_suffix(".tmp")
+    temp.write_text(json.dumps(data,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
+    os.replace(temp,target)
 
 def readback(media_id,caption):
     p=api(str(media_id)+"?fields=id,caption,media_type,media_product_type,permalink,timestamp")
@@ -139,10 +164,17 @@ def public_video_verified(video,asset):
     return RAW+asset["video"]
 
 def main():
-    if MODE=="publish" and NOW.time()<dtime(9,0):
-        log("INFINEX_REEL_NOT_DUE_YET");return
+    if not SLOT or not is_scheduled(DAY,SLOT,"reel"):
+        log("INFINEX_REEL_NOT_SCHEDULED_TODAY",STAMP);return
+    if MODE=="publish" and not due(DAY,SLOT,"reel",NOW):
+        log("INFINEX_REEL_NOT_DUE_YET",STAMP,SLOT);return
     asset,video=load_asset()
-    caption=CAPTIONS[asset["topic"]]
+    hook=asset.get("caption_hook", "")
+    if DAY>=START_DATE and (not isinstance(hook,str) or len(hook.strip())<18):
+        raise RuntimeError("INFINEX_REEL_UNIQUE_CAPTION_HOOK_REQUIRED")
+    caption=(hook.strip()+"\n\n" if hook else "")+CAPTIONS[asset["topic"]]
+    if topic_from_caption(caption)!=asset["topic"]:
+        raise RuntimeError("INFINEX_REEL_CAPTION_TOPIC_NOT_UNIQUE")
     if MODE=="dry_run":
         log("INFINEX_REEL_DRY_RUN_OK",STAMP,asset["topic"],video.stat().st_size)
         return
@@ -153,7 +185,7 @@ def main():
     if state.get("status") in ("REJECTED_BY_USER","DO_NOT_REPOST") or state.get("do_not_republish"):
         log("INFINEX_REEL_USER_REJECTED");return
     for item in current_media():
-        if item.get("caption")==caption:
+        if caption_reusable_media_item(item,caption,STAMP):
             verified=readback(item["id"],caption)
             state.update({"status":"PUBLISHED_VERIFIED","media_id":str(item["id"]),
                           "permalink":verified["permalink"],"topic":asset["topic"],"date":STAMP})
@@ -163,11 +195,13 @@ def main():
         raise RuntimeError("INFINEX_REEL_DELETED_NO_AUTOREPOST")
     if state.get("publish_attempt_started") or state.get("creation_id"):
         raise RuntimeError("INFINEX_REEL_UNCERTAIN_ATTEMPT_NO_RETRY")
+    validate_unique(BASE,asset,STAMP,SLOT)
     check_latest(asset["topic"])
     url=public_video_verified(video,asset)
-    state={"status":"PREPARED","date":STAMP,"slot":"09","topic":asset["topic"],
+    state={"status":"PREPARED","date":STAMP,"slot":SLOT,"topic":asset["topic"],
            "caption_sha256":hashlib.sha256(caption.encode()).hexdigest(),
-           "video_sha256":asset["video_sha256"],"publish_attempt_started":False}
+           "video_sha256":asset["video_sha256"],
+           "source_video_sha256":asset["source_video_sha256"],"publish_attempt_started":False}
     save(state);commit("INFINEX reserve safe morning reel "+STAMP)
     try:
         creation=api(ACCOUNT_ID+"/media",{
@@ -183,9 +217,12 @@ def main():
             time.sleep(8)
         if not ready:raise RuntimeError("INFINEX_REEL_CONTAINER_NOT_READY")
         check_latest(asset["topic"])
+        validate_unique(BASE,asset,STAMP,SLOT)
         state["publish_attempt_started"]=True
         state["status"]="PUBLISHING_UNCERTAIN_DO_NOT_RETRY";save(state)
-        commit("INFINEX reserve irreversible reel publish "+STAMP)
+        reserve_reel_fingerprint(asset)
+        # A remote durable reservation must succeed before submitting to Meta.
+        commit("INFINEX reserve irreversible reel fingerprint "+STAMP)
         published=api(ACCOUNT_ID+"/media_publish",{"creation_id":cid})
         media_id=str(published.get("id",""))
         if not media_id.isdigit():raise RuntimeError("INFINEX_REEL_NO_MEDIA_ID")

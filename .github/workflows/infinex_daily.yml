@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/infinex_daily.yml'
       - 'scripts/infinex_daily.py'
+      - 'scripts/infinex_weekly_plan.py'
+      - 'tests/test_infinex_morning_reels.py'
       - 'scripts/infinex_facebook.py'
       - 'tests/test_infinex_facebook.py'
       - 'tests/test_infinex_editorial.py'
@@ -76,6 +78,8 @@ jobs:
         run: python tests/test_infinex_editorial.py
       - name: Comprobar temas consecutivos y detalles por diapositiva
         run: python tests/test_infinex_editorial_policy.py
+      - name: Comprobar plan de 14 publicaciones y no repetir Reels
+        run: python tests/test_infinex_morning_reels.py
       - name: Comprobar y ejecutar INFINEX
         run: python scripts/infinex_daily.py "$MODE"
       - name: Simular carrusel de las 17 sin publicar

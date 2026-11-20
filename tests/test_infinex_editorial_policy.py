@@ -44,6 +44,8 @@ for bad in [None, {}, [{"id": "123", "caption": "INFINEX"}],
 # Confirm the normal scheduler rotates subjects without adjacent duplicates.
 from datetime import date, timezone
 import zoneinfo
+import json
+from infinex_weekly_plan import is_scheduled
 original = zoneinfo.ZoneInfo
 try:
     zoneinfo.ZoneInfo = lambda _name: timezone.utc
@@ -57,6 +59,13 @@ for index in range(20):
     daily.DATE = date.fromordinal(date(2026,11,19).toordinal() + index//2)
     daily.SLOT = "09" if index%2 == 0 else "17"
     theme = daily.topic_for_slot()
+    if is_scheduled(daily.DATE,daily.SLOT,"reel"):
+        sources = list((SCRIPTS.parent/"assets/reels").glob(
+            daily.DATE.isoformat()+"_"+daily.SLOT+"_*/sources.json"))
+        approved = [json.loads(f.read_text(encoding="utf-8")) for f in sources]
+        approved = [m for m in approved if m.get("approved_for_publish")]
+        assert len(approved)==1
+        theme=approved[0]["topic"]
     assert theme != previous, (previous, theme)
     previous = theme
 assert set(daily.SLIDE_DETAILS) == set(TOPICS)

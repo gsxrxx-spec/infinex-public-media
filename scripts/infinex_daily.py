@@ -16,6 +16,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from infinex_editorial_policy import TOPICS, assert_not_consecutive
+from infinex_weekly_plan import START_DATE, is_scheduled
 
 BASE = Path(__file__).resolve().parents[1]
 IG_ID = "17841435427297631"
@@ -122,7 +123,22 @@ def topic_for_slot():
     epoch = (DATE-date(2026,11,19)).days
     if epoch < 0: raise RuntimeError("DATE_BEFORE_EDITORIAL_START")
     edition = epoch*2 + (0 if SLOT=="09" else 1)
-    return TOPIC_ROTATION[edition % len(TOPIC_ROTATION)]
+    intended = TOPIC_ROTATION[edition % len(TOPIC_ROTATION)]
+    # If the other slot is an approved Reel, do not visually repeat its topic.
+    other="17" if SLOT=="09" else "09"
+    if DATE>=START_DATE and is_scheduled(DATE,other,"reel"):
+        manifests=list((BASE/"assets"/"reels").glob(
+            DATE.isoformat()+"_"+other+"_*/sources.json"))
+        approved=[]
+        for path in manifests:
+            candidate=json.loads(path.read_text(encoding="utf-8"))
+            if candidate.get("approved_for_publish") is True:
+                approved.append(candidate.get("topic"))
+        if len(approved)>1:
+            raise RuntimeError("EDITORIAL_MULTIPLE_REEL_ASSETS_SAME_SLOT")
+        if approved and intended==approved[0]:
+            intended=TOPIC_ROTATION[(edition+1)%len(TOPIC_ROTATION)]
+    return intended
 
 def photo_selection():
     data=json.loads(BANK.read_text(encoding="utf-8"))
@@ -369,6 +385,9 @@ def check_latest_topic():
 
 
 def dry_run():
+    if DATE>=START_DATE and not is_scheduled(DATE,SLOT,'carousel'):
+        log('INFINEX_CAROUSEL_NOT_SCHEDULED',DAY_KEY,SLOT)
+        return
     preflight()
     chosen,manifest=build()
     review_before_publish(chosen,manifest,caption_for(chosen))
@@ -377,10 +396,12 @@ def dry_run():
     for source in manifest["sources"]:log("LICENSED_SOURCE",source["page"])
 
 def publish():
-    # Desde el 20/11 el turno de las 09:00 corresponde a REELS,
-    # gestionado por infinex_reel_morning.py, nunca por este carrusel.
-    if SLOT=="09" and DATE>=date(2026,11,20):
-        log("MORNING_REEL_MANAGED_SEPARATELY",DAY_KEY,SLOT)
+    # Weekly policy: exactly five carousels and two Reels, one post/day.
+    if DATE>=START_DATE and not is_scheduled(DATE,SLOT,"carousel"):
+        log("INFINEX_CAROUSEL_NOT_SCHEDULED",DAY_KEY,SLOT)
+        return
+    if DATE>=START_DATE and datetime.now(TZ)<datetime.combine(DATE,dtime(int(SLOT)),tzinfo=TZ):
+        log("INFINEX_CAROUSEL_NOT_YET_DUE",DAY_KEY,SLOT)
         return
     preflight()
     chosen=photo_selection()
@@ -526,8 +547,11 @@ def recover():
         if day<start_day:
             break
         for slot in ("09","17"):
-            if slot=="09" and day>=date(2026,11,20):
-                log("RECOVERY_MORNING_REEL_SEPARATE",day.isoformat())
+            if day>=START_DATE and not is_scheduled(day,slot,"carousel"):
+                log("RECOVERY_NON_CAROUSEL_SLOT_SKIPPED",day.isoformat(),slot)
+                continue
+            if slot=="09" and day==date(2026,11,20):
+                log("RECOVERY_HISTORICAL_MORNING_ALREADY_HANDLED",day.isoformat())
                 continue
             due=datetime.combine(day,dtime(int(slot),0),tzinfo=TZ)
             if now<due:
