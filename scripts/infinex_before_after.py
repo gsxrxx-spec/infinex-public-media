@@ -243,6 +243,8 @@ def verify():
         log("BEFORE_AFTER_REVIEW_NOT_DUE",DATE);return
     if not LEDGER.exists():raise RuntimeError("INFINEX_BEFORE_AFTER_REVIEW_LEDGER_NOT_FOUND")
     state=read_json(LEDGER)
+    if state.get("status")=="PUBLISHED_VERIFIED" and state.get("reviewed_at"):
+        log("INFINEX_BEFORE_AFTER_ALREADY_INDEPENDENTLY_REVIEWED",DATE);return
     if not state.get("media_id"):raise RuntimeError("INFINEX_BEFORE_AFTER_REVIEW_NO_MEDIA_ID")
     post=verify_existing(state["media_id"],state["caption"])
     state.update({"status":"PUBLISHED_VERIFIED","permalink":post["permalink"],
