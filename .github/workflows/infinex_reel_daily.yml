@@ -1,4 +1,4 @@
-name: INFINEX - 2 Reels semanales en calendario 14 posts
+name: INFINEX - 2 Reels por semana (miercoles y sabado 09:30)
 
 on:
   push:
@@ -9,25 +9,20 @@ on:
       - 'scripts/infinex_reel_uniqueness.py'
       - 'assets/reels/NEVER_REUSE.json'
       - 'tests/test_infinex_morning_reels.py'
+      - 'tests/test_infinex_weekly_seven.py'
       - 'assets/reels/**/sources.json'
       - 'ops/reel_clock_ping.json'
   schedule:
-    - cron: '0 9 * * *'
+    # Excepcion transitoria: el sábado 21/11 conserva Reel de las 09:00.
+    - cron: '0 9 21 11 *'
       timezone: 'Europe/Madrid'
-    # Reintentos no duplicados por si GitHub retrasa o pierde una ejecucion
-    - cron: '9,19,29,39,49 9 * * *'
+    - cron: '30 9 * * *'
       timezone: 'Europe/Madrid'
-    - cron: '13,33,53 10 * * *'
+    - cron: '45 9 * * *'
       timezone: 'Europe/Madrid'
-    # Dos Reels por semana: lunes 09 y jueves 17, previa comprobacion calendario.
-    - cron: '0 17 * * *'
+    - cron: '5,25,45 10 * * *'
       timezone: 'Europe/Madrid'
-    - cron: '9,19,39,59 17 * * *'
-      timezone: 'Europe/Madrid'
-    - cron: '13,33 18 * * *'
-      timezone: 'Europe/Madrid'
-    # Recuperacion si el PC estuvo apagado o se perdieron lanzamientos
-    - cron: '17 11-23 * * *'
+    - cron: '15 12 * * *'
       timezone: 'Europe/Madrid'
   workflow_dispatch:
 
@@ -35,7 +30,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: infinex-instagram-diario
+  group: infinex-instagram-exclusive
   cancel-in-progress: false
 
 jobs:
@@ -53,7 +48,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validar 12 carruseles, 2 Reels, 14 franjas y prohibir reutilizar vídeo
+      - name: Validar Reels originales sin reutilizar
+        run: python tests/test_infinex_weekly_seven.py
+      - name: Validar programacion semanal de Reels
         run: python tests/test_infinex_morning_reels.py
       - name: Verificacion editorial sin publicar
         run: python scripts/infinex_reel_morning.py dry_run

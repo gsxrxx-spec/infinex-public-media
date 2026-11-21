@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""INFINEX: two carousels daily at 09 and 17 Europe/Madrid without duplicate retries."""
+"""INFINEX: two weekly informative carousels, daily 09:30 after editorial QA."""
 from __future__ import annotations
 import hashlib
 import io
@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from infinex_editorial_policy import TOPICS, assert_not_consecutive, topic_from_caption
 from infinex_autorepair import alternate_topics, unique_headlines
-from infinex_weekly_plan import START_DATE, is_scheduled
+from infinex_weekly_plan import START_DATE,CHANGE_DATE,is_scheduled,due,review_due,publish_hour_minute
 from infinex_carousel_quality import (REGISTRY,headings_for,validate_headings,
     used_photos,ensure_unique,reserve,confirmed_reserved,
     file_image_signature,hamming)
@@ -51,7 +51,7 @@ DAY_KEY = DATE.isoformat()
 SLOT = os.getenv("INFINEX_SLOT","09")
 if SLOT not in ("09","17"):
     raise RuntimeError("INVALID_PUBLICATION_SLOT")
-SLOT_TIME = SLOT + ":00"
+SLOT_TIME = ("09:30" if DATE>=CHANGE_DATE else SLOT+":00")
 MEDIA_DIR = BASE / "assets/daily" / DAY_KEY / SLOT
 RECORD_FILE = BASE / "records" / (DAY_KEY+"_"+SLOT+".json")
 REVIEW_TAG = "INFINEX-DIARIO-" + DATE.strftime("%Y%m%d") + "-" + SLOT
@@ -517,7 +517,7 @@ def publish():
     if DATE>=START_DATE and not is_scheduled(DATE,SLOT,"carousel"):
         log("INFINEX_CAROUSEL_NOT_SCHEDULED",DAY_KEY,SLOT)
         return
-    if DATE>=START_DATE and datetime.now(TZ)<datetime.combine(DATE,dtime(int(SLOT)),tzinfo=TZ):
+    if DATE>=START_DATE and not due(DATE,SLOT,"informative" if DATE>=CHANGE_DATE else "carousel",datetime.now(TZ)):
         log("INFINEX_CAROUSEL_NOT_YET_DUE",DAY_KEY,SLOT)
         return
     preflight()
@@ -679,7 +679,7 @@ def recover():
     attempted_publications=0
     attempted_reviews=0
     errors_today=[]
-    start_day=date(2026,11,19)
+    start_day=CHANGE_DATE
     # Most recent first: today's two slots always have priority over the backlog.
     for days_ago in range(31):
         day=now.date()-timedelta(days=days_ago)
@@ -692,7 +692,8 @@ def recover():
             if slot=="09" and day==date(2026,11,20):
                 log("RECOVERY_HISTORICAL_MORNING_ALREADY_HANDLED",day.isoformat())
                 continue
-            due=datetime.combine(day,dtime(int(slot),0),tzinfo=TZ)
+            h,m=publish_hour_minute(day,slot)
+            due=datetime.combine(day,dtime(h,m),tzinfo=TZ)
             if now<due:
                 continue
             ledger=BASE/"records"/(day.isoformat()+"_"+slot+".json")

@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-22",
+  "slot": "09",
+  "time_local": "09:30",
+  "type": "BEFORE_AFTER",
+  "topic": "puertas",
+  "scene_key": "pexels:8134821",
+  "illustrative_simulation": true,
+  "not_actual_infinex_works": true,
+  "description": "digital architectural mock-up; no real construction",
+  "source_page": "https://www.pexels.com/photo/modern-house-exterior-design-8134821/",
+  "source_author": "Max Vakhtbovych",
+  "source_license": "https://www.pexels.com/license/",
+  "source_image": "assets/before_after/2026-11-22_09_puertas/original.jpg",
+  "source_sha256": "b59344e4157ac2e13dd38df3ee585f550509fd16202187854c815672a2143733",
+  "logo_sha256": "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
+  "titles": [
+    "EL ACCESO, SIN PUERTA",
+    "UNA ENTRADA CON CARÁCTER"
+  ],
+  "images": [
+    {
+      "path": "assets/before_after/2026-11-22_09_puertas/01_antes.jpg",
+      "sha256": "b6566f9dbbb5de62e369ccb9e97ea6ac53571f25792f407a502839294acf2523"
+    },
+    {
+      "path": "assets/before_after/2026-11-22_09_puertas/02_despues.jpg",
+      "sha256": "73c8702cceccdc82399dbe5a5d447c24bedefb7ca5f2e3dc6f0116b79ba24172"
+    }
+  ],
+  "approved_for_publish": true
+}

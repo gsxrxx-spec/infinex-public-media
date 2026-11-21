@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-26",
+  "slot": "09",
+  "time_local": "09:30",
+  "type": "BEFORE_AFTER",
+  "topic": "cerramientos",
+  "scene_key": "pexels:13068513",
+  "illustrative_simulation": true,
+  "not_actual_infinex_works": true,
+  "description": "digital architectural mock-up; no real construction",
+  "source_page": "https://www.pexels.com/photo/large-driveway-in-front-of-the-house-13068513/",
+  "source_author": "Pexels",
+  "source_license": "https://www.pexels.com/license/",
+  "source_image": "assets/before_after/2026-11-26_09_cerramientos/original.jpg",
+  "source_sha256": "4f4f983ac9dac0da4113ab41a781b65313d6120421c9fde0b6bbd2e115c94aad",
+  "logo_sha256": "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
+  "titles": [
+    "DEL ESPACIO VACÍO",
+    "A UN EXTERIOR DEFINIDO"
+  ],
+  "images": [
+    {
+      "path": "assets/before_after/2026-11-26_09_cerramientos/01_antes.jpg",
+      "sha256": "1e6b39e8edf90c63e6b46db968babf7f7bf52659ba8fc5dcf3816758ba380a57"
+    },
+    {
+      "path": "assets/before_after/2026-11-26_09_cerramientos/02_despues.jpg",
+      "sha256": "8505a8039ea012008b058d0b3e93c2920cbc1409a932154866eaf42fc22290be"
+    }
+  ],
+  "approved_for_publish": true
+}

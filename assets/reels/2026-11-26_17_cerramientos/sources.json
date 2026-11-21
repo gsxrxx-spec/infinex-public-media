@@ -9,6 +9,6 @@
     "source_video_sha256":  "bfde5b679d547f278c9179af0effa32bc748edd928a9592be392b5e506dc912a",
     "logo_sha256":  "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
     "disclaimer":  "IA ilustrativa: no representa obra real",
-    "approved_for_publish":  true,
-    "caption_hook": "CERRAMIENTOS METÁLICOS | Privacidad y diseño a medida."
+    "approved_for_publish":  false,
+    "caption_hook":  "CERRAMIENTOS METÁLICOS | Privacidad y diseño a medida."
 }

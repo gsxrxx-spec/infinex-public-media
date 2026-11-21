@@ -7,6 +7,11 @@ on:
       - 'scripts/infinex_daily.py'
       - 'scripts/infinex_carousel_quality.py'
       - 'scripts/infinex_autorepair.py'
+      - 'scripts/infinex_before_after.py'
+      - 'scripts/infinex_prepare_before_after.py'
+      - 'tests/test_infinex_before_after.py'
+      - 'tests/test_infinex_weekly_seven.py'
+      - 'assets/before_after/**/sources.json'
       - 'tests/test_infinex_autorepair.py'
       - 'tests/test_infinex_carousel_originality.py'
       - 'scripts/infinex_weekly_plan.py'
@@ -17,16 +22,17 @@ on:
       - 'tests/test_infinex_editorial_policy.py'
       - 'scripts/infinex_editorial_policy.py'
   schedule:
-    - cron: '0 9 * * *'
+    # Mantener la ultima franja antigua del sábado 21/11/2026 exclusivamente.
+    - cron: '0 17 21 11 *'
       timezone: 'Europe/Madrid'
-    - cron: '15 9 * * *'
+    - cron: '30 9 * * *'
       timezone: 'Europe/Madrid'
-    - cron: '0 17 * * *'
+    - cron: '45 9 * * *'
       timezone: 'Europe/Madrid'
-    - cron: '15 17 * * *'
+    # Recuperacion independiente del PC si GitHub retrasa el disparador.
+    - cron: '5,25,45 10 * * *'
       timezone: 'Europe/Madrid'
-    # Recuperacion independiente del ordenador. Las ejecuciones pueden retrasarse.
-    - cron: '7,22,37,52 * * * *'
+    - cron: '15 12 * * *'
       timezone: 'Europe/Madrid'
   workflow_dispatch:
     inputs:
@@ -53,7 +59,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: infinex-instagram-diario
+  group: infinex-instagram-exclusive
   cancel-in-progress: false
 
 jobs:
@@ -63,8 +69,8 @@ jobs:
     env:
       INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
       INFINEX_FB_PAGE_TOKEN: ${{ secrets.INFINEX_FB_PAGE_TOKEN }}
-      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || github.event_name == 'push' && 'dry_run' || 'recover' }}
-      INFINEX_SLOT: ${{ github.event_name == 'workflow_dispatch' && inputs.slot || '09' }}
+      MODE: ${{ github.event_name == 'schedule' && github.event.schedule == '0 17 21 11 *' && 'publish' || github.event_name == 'workflow_dispatch' && inputs.mode || github.event_name == 'push' && 'dry_run' || 'recover' }}
+      INFINEX_SLOT: ${{ github.event_name == 'schedule' && github.event.schedule == '0 17 21 11 *' && '17' || github.event_name == 'workflow_dispatch' && inputs.slot || '09' }}
     steps:
       - name: Obtener repositorio
         uses: actions/checkout@v4
@@ -88,13 +94,17 @@ jobs:
         run: python tests/test_infinex_morning_reels.py
       - name: Validar autorreparación de fotos, textos y temas sin repetir
         run: python tests/test_infinex_autorepair.py
-      - name: Comprobar y ejecutar INFINEX
+      - name: Comprobar siete publicaciones 2+3+2 y antes/despues
+        run: python tests/test_infinex_weekly_seven.py
+      - name: Validar montajes y originales antes/despues sin publicar
+        run: python tests/test_infinex_before_after.py
+      - name: Publicador de carrusel informativo (solo lunes/viernes)
         run: python scripts/infinex_daily.py "$MODE"
-      - name: Simular carrusel de las 17 sin publicar
+      - name: Publicador antes y despues (solo martes/jueves/domingo)
+        run: python scripts/infinex_before_after.py "$MODE"
+      - name: Validacion del nuevo formato sin publicar
         if: ${{ github.event_name == 'push' }}
-        env:
-          INFINEX_SLOT: '17'
-        run: python scripts/infinex_daily.py dry_run
+        run: python scripts/infinex_before_after.py dry_run
       - name: Sincronizar Facebook con el carrusel verificado de Instagram
         if: ${{ vars.INFINEX_FB_SYNC_ENABLED == 'true' && (env.MODE == 'recover' || env.MODE == 'publish' || (env.MODE == 'dry_run' && github.event_name == 'workflow_dispatch')) }}
         run: python scripts/infinex_facebook.py "$MODE"
