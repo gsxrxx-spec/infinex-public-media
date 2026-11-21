@@ -1,5 +1,5 @@
 {
-  "status": "PUBLISHING_UNCERTAIN_DO_NOT_RETRY",
+  "status": "PUBLISHED_VERIFIED",
   "date": "2026-11-21",
   "slot": "09",
   "topic": "puertas",
@@ -7,5 +7,8 @@
   "video_sha256": "1847b1fad986b1ced6453078729b7cc3c0adc75d73452cc222e242ae9f115c8d",
   "source_video_sha256": "4eb69e2565ca7dc729fe055484587026692339276fec3686e522f95cc22aebd9",
   "publish_attempt_started": true,
-  "creation_id": "18114114116180910"
+  "creation_id": "18114114116180910",
+  "media_id": "18159411073515012",
+  "permalink": "https://www.instagram.com/reel/Df_wKHFjp13/",
+  "timestamp": "2026-11-21T08:01:22+0000"
 }
