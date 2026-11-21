@@ -1,10 +1,11 @@
 {
-  "status": "PREPARED",
+  "status": "CONTAINER_CREATED",
   "date": "2026-11-21",
   "slot": "09",
   "topic": "puertas",
   "caption_sha256": "91fa9a4b582304c67d81c175921291b1b35fd5bbfb8c96dd4e8aa33e0e5feb74",
   "video_sha256": "1847b1fad986b1ced6453078729b7cc3c0adc75d73452cc222e242ae9f115c8d",
   "source_video_sha256": "4eb69e2565ca7dc729fe055484587026692339276fec3686e522f95cc22aebd9",
-  "publish_attempt_started": false
+  "publish_attempt_started": false,
+  "creation_id": "18114114116180910"
 }
