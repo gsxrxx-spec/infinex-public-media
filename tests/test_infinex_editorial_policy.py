@@ -54,20 +54,32 @@ try:
     spec.loader.exec_module(daily)
 finally:
     zoneinfo.ZoneInfo = original
+# After the 22 November change there is exactly one post/day. Verify
+# real scheduled topics, not the discarded 17:00 time slots.
+from datetime import timedelta
+from infinex_weekly_plan import scheduled_posts
 previous = None
-for index in range(20):
-    daily.DATE = date.fromordinal(date(2026,11,19).toordinal() + index//2)
-    daily.SLOT = "09" if index%2 == 0 else "17"
-    theme = daily.topic_for_slot()
-    if is_scheduled(daily.DATE,daily.SLOT,"reel"):
+for index in range(7):
+    daily.DATE = date(2026,11,22)+timedelta(days=index)
+    daily.SLOT = "09"
+    daily.EDITORIAL_THEME = None
+    kind = scheduled_posts(daily.DATE)[0][1]
+    if kind == "reel":
         sources = list((SCRIPTS.parent/"assets/reels").glob(
-            daily.DATE.isoformat()+"_"+daily.SLOT+"_*/sources.json"))
+            daily.DATE.isoformat()+"_09_*/sources.json"))
         approved = [json.loads(f.read_text(encoding="utf-8")) for f in sources]
         approved = [m for m in approved if m.get("approved_for_publish")]
         assert len(approved)==1
         theme=approved[0]["topic"]
-    assert theme != previous, (previous, theme)
-    previous = theme
+    elif kind == "before_after":
+        sources=list((SCRIPTS.parent/"assets/before_after").glob(
+            daily.DATE.isoformat()+"_09_*/sources.json"))
+        assert len(sources)==1
+        theme=json.loads(sources[0].read_text(encoding="utf-8"))["topic"]
+    else:
+        theme=daily.topic_for_slot()
+    assert theme != previous, (daily.DATE,previous,theme)
+    previous=theme
 assert set(daily.SLIDE_DETAILS) == set(TOPICS)
 for theme, slides in daily.SLIDE_DETAILS.items():
     assert len(slides) == 3

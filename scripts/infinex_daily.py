@@ -128,6 +128,11 @@ SLIDE_DETAILS = {
 def topic_for_slot():
     if EDITORIAL_THEME is not None:
         return EDITORIAL_THEME
+    # Distinct information services: Mondays stairs, Fridays professional welding.
+    if DATE>=CHANGE_DATE and DATE.weekday()==0:
+        return "escaleras"
+    if DATE>=CHANGE_DATE and DATE.weekday()==4:
+        return "soldadura"
     epoch = (DATE-date(2026,11,19)).days
     if epoch < 0: raise RuntimeError("DATE_BEFORE_EDITORIAL_START")
     edition = epoch*2 + (0 if SLOT=="09" else 1)
@@ -161,14 +166,16 @@ def photo_candidates(theme):
                 if str(p["id"]) not in used and not any(
                     word in (p.get("page","")+" "+p.get("title","")).lower()
                     for word in ("rusty","creepy","deteriorated","damaged","broken","abandoned"))]
-    # Rotate candidates but keep the entire approved pool available if an
-    # individual photo turns out unsuitable or cannot be downloaded.
-    if not candidates:
-        return []
+    # Prefer visually reviewed premium sources before old bank photographs.
+    # Keep older licensed photos as additional options if an image fails QA.
+    premium=[p for p in candidates if p.get("curated_premium") is True]
+    standard=[p for p in candidates if not p.get("curated_premium")]
     edition=(DATE-date(2026,11,19)).days*2 + (0 if SLOT=="09" else 1)
-    offset=(edition//len(TOPIC_ROTATION))%len(candidates)
-    return [(group,candidates[(offset+i)%len(candidates)])
-            for i in range(len(candidates))]
+    # The premium bank is curated in visual-quality order. Photos already
+    # used by earlier posts are removed above; always choose the best fresh
+    # ones first, rather than rotating into lower-quality historic shots.
+    ordered=premium+standard
+    return [(group,p) for p in ordered]
 
 def photo_selection():
     selected=photo_candidates(topic_for_slot())

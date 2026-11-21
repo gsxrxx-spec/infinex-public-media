@@ -46,6 +46,48 @@
       "id": "33658802",
       "author": "Pexels",
       "page": "https://www.pexels.com/photo/skilled-welder-working-on-metal-gate-at-dusk-33658802/"
+    },
+    {
+      "id": "36964797",
+      "author": "Pexels",
+      "page": "https://www.pexels.com/photo/skilled-welder-at-work-in-metal-workshop-36964797/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "34039294",
+      "author": "Pexels",
+      "page": "https://www.pexels.com/photo/skilled-welder-in-industrial-workshop-34039294/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "11624247",
+      "author": "Pexels",
+      "page": "https://www.pexels.com/photo/person-welding-metal-11624247/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "37785339",
+      "author": "Pexels",
+      "page": "https://www.pexels.com/photo/welding-metal-in-outdoor-workshop-37785339/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "5845973",
+      "author": "Tima Miroshnichenko",
+      "page": "https://www.pexels.com/photo/man-in-safety-glasses-welding-a-metal-bar-5845973/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "30790482",
+      "author": "Pexels",
+      "page": "https://www.pexels.com/photo/professional-welder-at-work-in-industrial-setting-30790482/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
     }
   ],
   "gates": [
@@ -140,6 +182,48 @@
       "id": "13565214",
       "author": "Pexels",
       "page": "https://www.pexels.com/photo/high-angle-view-of-a-staircase-with-metal-railing-13565214/"
+    },
+    {
+      "id": "12722044",
+      "author": "Antoine Maurin",
+      "page": "https://www.pexels.com/photo/contemporary-minimalistic-staircase-12722044/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "7078723",
+      "author": "Laura Tancredi",
+      "page": "https://www.pexels.com/photo/staircase-with-metal-railing-and-white-wall-7078723/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "4177520",
+      "author": "RF._.studio",
+      "page": "https://www.pexels.com/photo/modern-staircase-of-white-building-in-sunlight-4177520/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "6127375",
+      "author": "Rachel Claire",
+      "page": "https://www.pexels.com/photo/a-staircase-with-metal-railing-on-a-concrete-wall-6127375/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "15581383",
+      "author": "Jakob Jin",
+      "page": "https://www.pexels.com/photo/modern-staircase-interior-15581383/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
+    },
+    {
+      "id": "28354581",
+      "author": "Pexels",
+      "page": "https://www.pexels.com/photo/a-close-up-of-a-set-of-stairs-with-metal-bars-28354581/",
+      "curated_premium": true,
+      "verified_source_license": "https://www.pexels.com/license/"
     }
   ]
 }
