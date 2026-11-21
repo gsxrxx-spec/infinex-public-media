@@ -155,6 +155,30 @@
         "CUÉNTANOS TU PROYECTO"
       ],
       "status": "RESERVED_NO_REUSE"
+    },
+    {
+      "key": "2026-11-21_17",
+      "source_ids": [
+        "12722044",
+        "7078723",
+        "4177520"
+      ],
+      "image_sha256": [
+        "6d891d68c8f743d4f44454d8b6576a30334eae7a20d4572c761a0d47665f54f7",
+        "5717d03ed43797005a85ef9e49c5683693bcb01b166731fa56236f51b388acf7",
+        "34fddcd703dd3f1ecda09e427d59a85c4eff0dffb025131db98a9b90ab5cec7b"
+      ],
+      "hero_dhash": [
+        "ec6c2cac8e6c3430",
+        "efeb6f6cac8ccc6a",
+        "8288a48482b3b331"
+      ],
+      "titles": [
+        "SUBE EL NIVEL DE TU CASA",
+        "TU ESTILO, TUS MEDIDAS",
+        "HAGÁMOSLA REALIDAD"
+      ],
+      "status": "RESERVED_NO_REUSE"
     }
   ]
 }

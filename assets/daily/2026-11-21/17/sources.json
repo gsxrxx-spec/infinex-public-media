@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-21",
+  "slot": "17",
+  "destination": "infinex_2025",
+  "license": "https://www.pexels.com/license/",
+  "not_actual_infinex_works": true,
+  "titles": [
+    "SUBE EL NIVEL DE TU CASA",
+    "TU ESTILO, TUS MEDIDAS",
+    "HAGÁMOSLA REALIDAD"
+  ],
+  "sources": [
+    {
+      "id": "12722044",
+      "category": "structures",
+      "page": "https://www.pexels.com/photo/contemporary-minimalistic-staircase-12722044/",
+      "author": "Antoine Maurin"
+    },
+    {
+      "id": "7078723",
+      "category": "structures",
+      "page": "https://www.pexels.com/photo/staircase-with-metal-railing-and-white-wall-7078723/",
+      "author": "Laura Tancredi"
+    },
+    {
+      "id": "4177520",
+      "category": "structures",
+      "page": "https://www.pexels.com/photo/modern-staircase-of-white-building-in-sunlight-4177520/",
+      "author": "RF._.studio"
+    }
+  ],
+  "images": [
+    {
+      "path": "assets/daily/2026-11-21/17/01.jpg",
+      "sha256": "6d891d68c8f743d4f44454d8b6576a30334eae7a20d4572c761a0d47665f54f7"
+    },
+    {
+      "path": "assets/daily/2026-11-21/17/02.jpg",
+      "sha256": "5717d03ed43797005a85ef9e49c5683693bcb01b166731fa56236f51b388acf7"
+    },
+    {
+      "path": "assets/daily/2026-11-21/17/03.jpg",
+      "sha256": "34fddcd703dd3f1ecda09e427d59a85c4eff0dffb025131db98a9b90ab5cec7b"
+    }
+  ]
+}
