@@ -1,32 +1,33 @@
 {
-  "date": "2026-11-24",
-  "slot": "09",
-  "time_local": "09:30",
-  "type": "BEFORE_AFTER",
-  "topic": "cerramientos",
-  "scene_key": "pexels:24419877",
-  "illustrative_simulation": true,
-  "not_actual_infinex_works": true,
-  "description": "digital architectural mock-up; no real construction",
-  "source_page": "https://www.pexels.com/photo/view-of-a-yard-24419877/",
-  "source_author": "Sharath G.",
-  "source_license": "https://www.pexels.com/license/",
-  "source_image": "assets/before_after/2026-11-24_09_cerramientos/original.jpg",
-  "source_sha256": "0dd74212bb98a6e2991898603379e0a5d7dc30148d9edb1728350195a8de6677",
-  "logo_sha256": "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
-  "titles": [
-    "UN PASO ABIERTO",
-    "PRIVACIDAD CON DISEÑO"
-  ],
-  "images": [
-    {
-      "path": "assets/before_after/2026-11-24_09_cerramientos/01_antes.jpg",
-      "sha256": "cc6ddd609f41164e5c6303102dd6ecbadd08cb4bbffb97c3348274a71b7480ac"
-    },
-    {
-      "path": "assets/before_after/2026-11-24_09_cerramientos/02_despues.jpg",
-      "sha256": "6d125de8dd956b31a1ebb1b26b1ae8997ac78941240a04fda38db963ff6a159f"
-    }
-  ],
-  "approved_for_publish": true
+    "date":  "2026-11-24",
+    "slot":  "09",
+    "time_local":  "09:30",
+    "type":  "BEFORE_AFTER",
+    "topic":  "cerramientos",
+    "scene_key":  "pexels:24419877",
+    "illustrative_simulation":  true,
+    "not_actual_infinex_works":  true,
+    "description":  "digital architectural mock-up; no real construction",
+    "source_page":  "https://www.pexels.com/photo/view-of-a-yard-24419877/",
+    "source_author":  "Sharath G.",
+    "source_license":  "https://www.pexels.com/license/",
+    "source_image":  "assets/before_after/2026-11-24_09_cerramientos/original.jpg",
+    "source_sha256":  "0dd74212bb98a6e2991898603379e0a5d7dc30148d9edb1728350195a8de6677",
+    "logo_sha256":  "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
+    "titles":  [
+                   "UN PASO ABIERTO",
+                   "PRIVACIDAD CON DISEÑO"
+               ],
+    "images":  [
+                   {
+                       "path":  "assets/before_after/2026-11-24_09_cerramientos/01_antes.jpg",
+                       "sha256":  "cc6ddd609f41164e5c6303102dd6ecbadd08cb4bbffb97c3348274a71b7480ac"
+                   },
+                   {
+                       "path":  "assets/before_after/2026-11-24_09_cerramientos/02_despues.jpg",
+                       "sha256":  "6d125de8dd956b31a1ebb1b26b1ae8997ac78941240a04fda38db963ff6a159f"
+                   }
+               ],
+    "approved_for_publish":  false,
+    "visual_fit_status":  "NEEDS_NEW_TWO_SUPPORT_SITE_AND_VISUAL_QA"
 }

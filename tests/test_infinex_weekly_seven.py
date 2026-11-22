@@ -35,7 +35,13 @@ for day in ("2026-11-22","2026-11-24","2026-11-26"):
     assert len(files)==1,(day,files)
     m=json.loads(files[0].read_text(encoding="utf-8"))
     assert m["date"]==day and m["slot"]=="09" and m["time_local"]=="09:30"
-    assert m["type"]=="BEFORE_AFTER" and m["approved_for_publish"] is True
+    assert m["type"]=="BEFORE_AFTER"
+    # Rejected Sunday post remains permanently spent; Tuesday/Thursday are
+    # quarantined until physical gate anchors and visual QA are repaired.
+    assert m["approved_for_publish"] is False
+    assert m.get("visual_fit_status") in (
+        "REJECTED_BY_USER_NEVER_REPOST",
+        "NEEDS_NEW_TWO_SUPPORT_SITE_AND_VISUAL_QA")
     assert m["illustrative_simulation"] is True and m["not_actual_infinex_works"] is True
     assert m["source_license"]=="https://www.pexels.com/license/"
     assert len(m["images"])==2 and len(set(m["titles"]))==2

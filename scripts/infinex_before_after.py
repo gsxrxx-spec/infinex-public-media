@@ -13,6 +13,7 @@ from PIL import Image
 from infinex_weekly_plan import TZ,is_scheduled,due,review_due
 from infinex_editorial_policy import assert_not_consecutive,topic_from_caption
 from infinex_carousel_quality import used_photos
+from infinex_gate_geometry_qa import validate_fit
 
 BASE=Path(__file__).resolve().parents[1]
 NOW=datetime.now(TZ);DAY=NOW.date();DATE=DAY.isoformat()
@@ -66,6 +67,16 @@ def manifest():
                 raise RuntimeError("INFINEX_BEFORE_AFTER_IMAGE_NOT_1080x1350")
     if m["images"][0]["sha256"]==m["images"][1]["sha256"]:
         raise RuntimeError("INFINEX_BEFORE_AFTER_NO_VISIBLE_CHANGE")
+    # Realistic masonry/metal supports, threshold and final render must be
+    # manually and geometrically verified, not inferred from image dimensions.
+    if m.get("topic") in ("puertas","cerramientos"):
+        fit=m.get("physical_installation_fit")
+        if not isinstance(fit,dict):
+            raise RuntimeError("INFINEX_GATE_FIT_REVIEW_NOT_PRESENT_REBUILD_ASSET")
+        with Image.open(BASE/m["source_image"]) as source:
+            validate_fit(fit,source.size,require_final_review=True)
+        if fit["final_render_visual_review"].get("render_sha256")!=m["images"][1]["sha256"]:
+            raise RuntimeError("INFINEX_GATE_VISUAL_QA_RENDER_HASH_CHANGED")
     return m
 def caption(m):
     subject={
@@ -253,6 +264,13 @@ def verify():
     log("INFINEX_BEFORE_AFTER_INDEPENDENTLY_VERIFIED",post["permalink"])
 
 def main():
+    # A user-rejected post must never be re-uploaded, even after deletion.
+    # Historical asset SHA and scene reservation remain permanently stored.
+    if LEDGER.exists():
+        historical=read_json(LEDGER)
+        if historical.get("status")=="REJECTED_BY_USER" or historical.get("do_not_republish"):
+            log("INFINEX_BEFORE_AFTER_USER_REJECTED_NO_REPOST",DATE)
+            return
     if not is_scheduled(DAY,SLOT,"before_after"):
         log("INFINEX_BEFORE_AFTER_NOT_SCHEDULED",DATE);return
     if MODE=="dry_run":

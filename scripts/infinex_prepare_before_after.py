@@ -131,6 +131,12 @@ def slide(scene,mode,plan,out):
 
 def build(day):
     p=PLANS[day]
+    # Never revive a rejected published scene or render floating overlays
+    # from unannotated arbitrary coordinates. Select a new, supportable scene.
+    if day=="2026-11-22":
+        raise RuntimeError("INFINEX_GATE_USER_REJECTED_SCENE_PERMANENTLY_SPENT")
+    if not p.get("physical_installation_fit"):
+        raise RuntimeError("INFINEX_GATE_SPAWN_REQUIRES_TWO_VISIBLE_PILLAR_ANNOTATIONS")
     dest=BASE/"assets"/"before_after"/(day+"_09_"+p["topic"])
     dest.mkdir(parents=True,exist_ok=True)
     source=dest/"original.jpg"
@@ -147,7 +153,9 @@ def build(day):
     original=Image.open(source).convert("RGB")
     if original.width<1400 or original.height<900:
         raise RuntimeError("SOURCE_NOT_SUFFICIENT_RESOLUTION")
-    modified=draw_gate(original,p["geometry"],p["style"])
+    from infinex_gate_geometry_qa import validate_fit,draw_fitted_gate
+    validate_fit(p["physical_installation_fit"],original.size)
+    modified=draw_fitted_gate(original,p["physical_installation_fit"])
     before=dest/"01_antes.jpg"
     after=dest/"02_despues.jpg"
     slide(original,"before",p,before)
