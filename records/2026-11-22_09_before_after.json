@@ -1,7 +1,7 @@
 {
   "date": "2026-11-22",
   "slot": "09",
-  "status": "PUBLISHED_VERIFIED",
+  "status": "REJECTED_BY_USER",
   "topic": "puertas",
   "caption": "INFINEX | ANTES Y DESPUÉS · 2026-11-22\n\n¿Y si este espacio cambiara por completo con un puerta metálica de acceso? 🟠\n\n1️⃣ ANTES: el acceso sin el elemento metálico.\n2️⃣ DESPUÉS: cómo podría quedar con una solución diseñada a medida.\n\nCada proyecto exige estudiar medidas, materiales, anclajes y acabados. Si tienes una entrada o una zona por transformar, escríbenos y pide presupuesto sin compromiso.\n\n⚠️ Simulación digital ilustrativa sobre una fotografía de archivo de Pexels. No corresponde a una instalación real realizada por INFINEX.\nFoto de Max Vakhtbovych (Pexels).\n\n#INFINEX #AntesYDespues #Metalisteria #PuertasMetalicas",
   "scene_key": "pexels:8134821",
@@ -25,5 +25,8 @@
   "media_id": "17956845819279745",
   "permalink": "https://www.instagram.com/p/DgCam4ZjbNh/",
   "timestamp": "2026-11-22T08:50:23+0000",
-  "reviewed_at": "2026-11-22T09:50:29.710205+01:00"
+  "reviewed_at": "2026-11-22T09:50:29.710205+01:00",
+  "do_not_republish": true,
+  "visual_quality_rejection": "Gate is floating or misaligned: posts/pillars and floor do not match; user requested deletion",
+  "replacement_policy": "NEVER_AUTOREPOST_OR_REUSE_SCENE"
 }
