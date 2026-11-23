@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-23",
+  "slot": "09",
+  "destination": "infinex_2025",
+  "license": "https://www.pexels.com/license/",
+  "not_actual_infinex_works": true,
+  "titles": [
+    "CREAMOS CON METAL",
+    "CUIDAMOS LOS DETALLES",
+    "PIDE TU PROPUESTA"
+  ],
+  "sources": [
+    {
+      "id": "36964797",
+      "category": "welding",
+      "page": "https://www.pexels.com/photo/skilled-welder-at-work-in-metal-workshop-36964797/",
+      "author": "Pexels"
+    },
+    {
+      "id": "34039294",
+      "category": "welding",
+      "page": "https://www.pexels.com/photo/skilled-welder-in-industrial-workshop-34039294/",
+      "author": "Pexels"
+    },
+    {
+      "id": "11624247",
+      "category": "welding",
+      "page": "https://www.pexels.com/photo/person-welding-metal-11624247/",
+      "author": "Pexels"
+    }
+  ],
+  "images": [
+    {
+      "path": "assets/daily/2026-11-23/09/01.jpg",
+      "sha256": "fc81997a9f8f098096b558f200a3aa4ff74742d46964022da8c90694af0b9e04"
+    },
+    {
+      "path": "assets/daily/2026-11-23/09/02.jpg",
+      "sha256": "d6767de632983431a40db5862f7c1402ae90539c9b0222a411c484c69cfdf4d5"
+    },
+    {
+      "path": "assets/daily/2026-11-23/09/03.jpg",
+      "sha256": "a4af92915fc77bab9ff8a3bb7d28f147f737d75c7b7d98ae8089f7c5660a035c"
+    }
+  ]
+}

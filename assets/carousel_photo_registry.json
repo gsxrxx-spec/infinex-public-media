@@ -179,6 +179,30 @@
         "HAGÁMOSLA REALIDAD"
       ],
       "status": "RESERVED_NO_REUSE"
+    },
+    {
+      "key": "2026-11-23_09",
+      "source_ids": [
+        "36964797",
+        "34039294",
+        "11624247"
+      ],
+      "image_sha256": [
+        "fc81997a9f8f098096b558f200a3aa4ff74742d46964022da8c90694af0b9e04",
+        "d6767de632983431a40db5862f7c1402ae90539c9b0222a411c484c69cfdf4d5",
+        "a4af92915fc77bab9ff8a3bb7d28f147f737d75c7b7d98ae8089f7c5660a035c"
+      ],
+      "hero_dhash": [
+        "ec79e7e7f6fc3939",
+        "2202028783b3b393",
+        "ec66260e8c3697d7"
+      ],
+      "titles": [
+        "CREAMOS CON METAL",
+        "CUIDAMOS LOS DETALLES",
+        "PIDE TU PROPUESTA"
+      ],
+      "status": "RESERVED_NO_REUSE"
     }
   ]
 }

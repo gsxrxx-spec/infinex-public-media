@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-23",
+  "slot": "09",
+  "target": "infinex_2025",
+  "account_id": "17841435427297631",
+  "status": "CLAIMED_NO_RETRY",
+  "caption": "INFINEX | Ideas en hierro. Soluciones reales. 🟠\n\n¿Tienes una pieza de hierro que necesitas reparar, reforzar o adaptar? 🔶\n\nA veces no necesitas sustituirlo todo: necesitas una solución metálica bien pensada para el uso real. En INFINEX trabajamos el hierro y la soldadura en proyectos a medida.\n\nCuéntanos qué necesitas y pide presupuesto sin compromiso.\n\n#INFINEX #Soldadura #Hierro #FabricacionMetalica\n\n📷 Fotografías ilustrativas de archivo (Pexels). No son obras ejecutadas por INFINEX.\n\n📅 23/11/2026 · 09:30",
+  "images": [
+    {
+      "path": "assets/daily/2026-11-23/09/01.jpg",
+      "sha256": "fc81997a9f8f098096b558f200a3aa4ff74742d46964022da8c90694af0b9e04"
+    },
+    {
+      "path": "assets/daily/2026-11-23/09/02.jpg",
+      "sha256": "d6767de632983431a40db5862f7c1402ae90539c9b0222a411c484c69cfdf4d5"
+    },
+    {
+      "path": "assets/daily/2026-11-23/09/03.jpg",
+      "sha256": "a4af92915fc77bab9ff8a3bb7d28f147f737d75c7b7d98ae8089f7c5660a035c"
+    }
+  ],
+  "media_id": null,
+  "children": [],
+  "creation_id": null,
+  "publish_attempt_started": false,
+  "attempt_count": 1,
+  "source": "Pexels; illustrative photos, not INFINEX jobs"
+}
