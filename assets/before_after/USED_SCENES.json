@@ -2,9 +2,11 @@
   "schema": 1,
   "policy": "A before/after pair may show the same location at different stages within its own post. That exact scene may never appear in any other post. Originals and deleted publications stay reserved. No false claims of completed INFINEX work.",
   "used_sources": [
-    "pexels:8134821"
+    "pexels:8134821",
+    "pexels:37164155"
   ],
   "used_days": [
-    "2026-11-22"
+    "2026-11-22",
+    "2026-11-24"
   ]
 }
