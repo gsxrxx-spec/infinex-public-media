@@ -1,7 +1,7 @@
 {
   "date": "2026-11-24",
   "slot": "09",
-  "status": "PREPARED",
+  "status": "CONTAINER_CREATED",
   "topic": "puertas",
   "caption": "INFINEX | ANTES Y DESPUÉS · 2026-11-24\n\n¿Y si este espacio cambiara por completo con una puerta metálica de acceso? 🟠\n\n1️⃣ ANTES: una puerta antigua de madera, desgastada por el tiempo.\n2️⃣ DESPUÉS: cómo podría quedar con una solución diseñada a medida.\n\nCada proyecto exige estudiar medidas, materiales, anclajes y acabados. Si tienes una entrada o una zona por transformar, escríbenos y pide presupuesto sin compromiso.\n\n⚠️ Simulación digital ilustrativa sobre una fotografía de archivo de Pexels. No corresponde a una instalación real realizada por INFINEX.\nFoto de Frederick Adegoke Snr. (Pexels).\n\n#INFINEX #AntesYDespues #Metalisteria #PuertasMetalicas",
   "scene_key": "pexels:37164155",
@@ -16,6 +16,10 @@
       "sha256": "deb1f1133f02e0d2a48a0842ebff7a27f6c1489b6d0bbe958cac323b8dd09e03"
     }
   ],
-  "children": [],
-  "publish_attempt_started": false
+  "children": [
+    "18114759608180910",
+    "18114759632180910"
+  ],
+  "publish_attempt_started": false,
+  "creation_id": "18114759665180910"
 }
