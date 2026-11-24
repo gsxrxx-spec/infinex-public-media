@@ -1,0 +1,94 @@
+{
+  "date": "2026-11-24",
+  "slot": "09",
+  "time_local": "09:30",
+  "type": "BEFORE_AFTER",
+  "topic": "puertas",
+  "scene_key": "pexels:37164155",
+  "illustrative_simulation": true,
+  "not_actual_infinex_works": true,
+  "description": "Ejemplo digital de renovación de puerta antigua a hojas modernas, sin obra real",
+  "source_page": "https://www.pexels.com/photo/rustic-wooden-gate-in-lush-green-landscape-37164155/",
+  "source_author": "Frederick Adegoke Snr.",
+  "source_license": "https://www.pexels.com/license/",
+  "source_image": "assets/before_after/2026-11-24_09_puertas/original.jpg",
+  "source_sha256": "db1e8001359452ee54382479955ab03083ff3e5dbb94cc251f4830c693cffc5a",
+  "logo_sha256": "65e35a825681bad432082014a8b69402d30996be58b3ae97958deb3a40d33f31",
+  "titles": [
+    "UNA PUERTA QUE PIDE CAMBIO",
+    "UN ACCESO MODERNO Y SEGURO"
+  ],
+  "images": [
+    {
+      "path": "assets/before_after/2026-11-24_09_puertas/01_antes.jpg",
+      "sha256": "40e367bbf37e55285a04bf11360a8f9cde61e8bcb6b94b313e5094b9f6031361"
+    },
+    {
+      "path": "assets/before_after/2026-11-24_09_puertas/02_despues.jpg",
+      "sha256": "deb1f1133f02e0d2a48a0842ebff7a27f6c1489b6d0bbe958cac323b8dd09e03"
+    }
+  ],
+  "geometry_annotation": {
+    "left_support_top": 333,
+    "left_support_bottom": 332,
+    "right_support_top": 969,
+    "right_support_bottom": 966,
+    "gate_left_top": 335,
+    "gate_left_bottom": 334,
+    "gate_right_top": 967,
+    "gate_right_bottom": 964,
+    "gate_top_y": 439,
+    "gate_bottom_y": 814,
+    "threshold_y": 824,
+    "support_type_left": "masonry_pillar",
+    "support_type_right": "masonry_pillar",
+    "supports_visible": true,
+    "perspective_checked": true,
+    "ground_contact_checked": true,
+    "architectural_source_notes": "Both old stone gate piers are clearly visible and extend down to the gravel threshold; the original weathered wood gate occupies the identical span.",
+    "final_render_visual_review": {
+      "status": "PASS",
+      "render_sha256": "deb1f1133f02e0d2a48a0842ebff7a27f6c1489b6d0bbe958cac323b8dd09e03",
+      "reviewed_at": "2026-11-24T17:13:32.297128+01:00",
+      "verified_pillar_alignment": true,
+      "verified_no_floating": true,
+      "verified_correct_scale": true,
+      "verified_realistic_perspective": true,
+      "notes": "Inspected both full 1080x1350 slides: old wood gate aligned to left/right visible stone supports; revised opaque metal leaves aligned to exactly same opening, hinge brackets on both piers and bottom edge at the same gravel threshold. Clearly declared illustrative proposal."
+    }
+  },
+  "visual_review": {
+    "status": "PASS",
+    "render_sha256": "deb1f1133f02e0d2a48a0842ebff7a27f6c1489b6d0bbe958cac323b8dd09e03"
+  },
+  "approved_for_publish": true,
+  "physical_installation_fit": {
+    "left_support_top": 333,
+    "left_support_bottom": 332,
+    "right_support_top": 969,
+    "right_support_bottom": 966,
+    "gate_left_top": 335,
+    "gate_left_bottom": 334,
+    "gate_right_top": 967,
+    "gate_right_bottom": 964,
+    "gate_top_y": 439,
+    "gate_bottom_y": 814,
+    "threshold_y": 824,
+    "support_type_left": "masonry_pillar",
+    "support_type_right": "masonry_pillar",
+    "supports_visible": true,
+    "perspective_checked": true,
+    "ground_contact_checked": true,
+    "architectural_source_notes": "Both old stone gate piers are clearly visible and extend down to the gravel threshold; the original weathered wood gate occupies the identical span.",
+    "final_render_visual_review": {
+      "status": "PASS",
+      "render_sha256": "deb1f1133f02e0d2a48a0842ebff7a27f6c1489b6d0bbe958cac323b8dd09e03",
+      "reviewed_at": "2026-11-24T17:13:32.297128+01:00",
+      "verified_pillar_alignment": true,
+      "verified_no_floating": true,
+      "verified_correct_scale": true,
+      "verified_realistic_perspective": true,
+      "notes": "Inspected both full 1080x1350 slides: old wood gate aligned to left/right visible stone supports; revised opaque metal leaves aligned to exactly same opening, hinge brackets on both piers and bottom edge at the same gravel threshold. Clearly declared illustrative proposal."
+    }
+  }
+}

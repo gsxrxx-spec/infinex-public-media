@@ -1,42 +1,46 @@
 #!/usr/bin/env python3
-"""Safety QA for the post-user-rejected INFINEX before/after queue. No Meta calls."""
+"""INFINEX before-after review: permanent reject, replacement approved, upcoming pending."""
 from pathlib import Path
 from datetime import date
 import json,sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"scripts"))
 import infinex_before_after as worker
-from infinex_editorial_policy import topic_from_caption
+from infinex_gate_geometry_qa import validate_fit
+from PIL import Image
 base=Path(__file__).resolve().parents[1]
-# User expressly rejected original 22nd gate; must survive manual Instagram deletion.
-worker.DAY=date(2026,11,22)
-worker.DATE="2026-11-22"
+worker.DAY=date(2026,11,22);worker.DATE="2026-11-22"
 worker.LEDGER=base/"records/2026-11-22_09_before_after.json"
 prior=json.loads(worker.LEDGER.read_text(encoding="utf-8"))
 assert prior["status"]=="REJECTED_BY_USER" and prior["do_not_republish"] is True
 assert prior["media_id"]=="17956845819279745"
-old=list((base/"assets/before_after").glob("2026-11-22_09_*/sources.json"))
-assert len(old)==1
-old_manifest=json.loads(old[0].read_text(encoding="utf-8-sig"))
-assert old_manifest["approved_for_publish"] is False
-worker.MODE="dry_run"
-worker.main()
-print("INFINEX_REJECTED_PUBLICATION_NEVER_REPOST_TEST_OK")
+old=json.loads(next((base/"assets/before_after").glob("2026-11-22_09_*/sources.json")).read_text(encoding="utf-8"))
+assert old["approved_for_publish"] is False
+worker.MODE="dry_run";worker.main()
+print("INFINEX_USER_REJECTED_GATE_NEVER_REPOST_OK")
 
-# Upcoming gate photos are not approved until anchored to visible structural
-# supports and a reviewer signs off on the precise finished render SHA.
-for day in ("2026-11-24","2026-11-26"):
-    worker.DAY=date.fromisoformat(day)
-    worker.DATE=day
-    worker.LEDGER=base/"records"/(day+"_09_before_after.json")
-    files=list((base/"assets/before_after").glob(day+"_09_*/sources.json"))
-    assert len(files)==1
-    m=json.loads(files[0].read_text(encoding="utf-8-sig"))
-    assert m["approved_for_publish"] is False
-    assert m["visual_fit_status"]=="NEEDS_NEW_TWO_SUPPORT_SITE_AND_VISUAL_QA"
-    try:
-        worker.manifest()
-        raise AssertionError("UNVERIFIED_GATE_MANIFEST_DID_NOT_FAIL")
-    except RuntimeError as err:
-        assert "NOT_APPROVED" in str(err) or "FIT_REVIEW" in str(err)
-    print("INFINEX_FUTURE_SCENE_MUST_BE_REPLACED_AND_QA_REVIEWED",day)
-print("INFINEX_BEFORE_AFTER_FAIL_SAFE_TESTS_PASSED")
+worker.DAY=date(2026,11,24);worker.DATE="2026-11-24"
+worker.LEDGER=base/"records/2026-11-24_09_before_after.json"
+candidates=[json.loads(x.read_text(encoding="utf-8-sig"))
+            for x in (base/"assets/before_after").glob("2026-11-24_09_*/sources.json")]
+assert len(candidates)==2
+approved=[m for m in candidates if m["approved_for_publish"]]
+assert len(approved)==1 and approved[0]["scene_key"]=="pexels:37164155"
+assert any(not m["approved_for_publish"] for m in candidates)
+m=worker.manifest()
+assert m["physical_installation_fit"]["final_render_visual_review"]["status"]=="PASS"
+with Image.open(base/m["source_image"]) as im:
+    assert validate_fit(m["physical_installation_fit"],im.size,True)
+assert worker.sources_available(m).get("schema")==1
+worker.main()
+print("INFINEX_NEW_GATE_REPLACEMENT_VERIFIED_AND_APPROVED_FOR_TODAY")
+
+worker.DAY=date(2026,11,26);worker.DATE="2026-11-26"
+worker.LEDGER=base/"records/2026-11-26_09_before_after.json"
+future=json.loads(next((base/"assets/before_after").glob("2026-11-26_09_*/sources.json")).read_text(encoding="utf-8-sig"))
+assert future["approved_for_publish"] is False
+try:
+    worker.manifest()
+    raise AssertionError("UNREVIEWED_THURSDAY_GATE_APPROVED")
+except RuntimeError as e:
+    assert "ONE_APPROVED_REPLACEMENT_REQUIRED" in str(e)
+print("INFINEX_THURSDAY_SCENE_PENDING_NEW_FIT_REVIEW")

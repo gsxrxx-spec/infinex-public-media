@@ -1,0 +1,8 @@
+{
+    "day":  "2026-11-24",
+    "kind":  "before_after",
+    "purpose":  "safe_recover_new_approved_replacement_after_qa",
+    "requested_by":  "owner",
+    "not_old_rejected_post":  true,
+    "fired_local":  "2026-11-24T17:18:09"
+}

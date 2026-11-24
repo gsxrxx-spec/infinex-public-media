@@ -37,9 +37,11 @@ def read_json(p):return json.loads(p.read_text(encoding="utf-8"))
 def media_paths():
     return list((BASE/"assets"/"before_after").glob(DATE+"_09_*/sources.json"))
 def manifest():
-    candidates=media_paths()
-    if len(candidates)!=1:raise RuntimeError("INFINEX_BEFORE_AFTER_APPROVED_ASSET_COUNT_NOT_ONE")
-    m=read_json(candidates[0])
+    candidates=[read_json(p) for p in media_paths()]
+    approved=[m for m in candidates if m.get("approved_for_publish") is True]
+    if len(approved)!=1:
+        raise RuntimeError("INFINEX_BEFORE_AFTER_ONE_APPROVED_REPLACEMENT_REQUIRED")
+    m=approved[0]
     if (m.get("approved_for_publish") is not True or
         m.get("illustrative_simulation") is not True or
         m.get("not_actual_infinex_works") is not True or
@@ -86,10 +88,14 @@ def caption(m):
     }.get(m["topic"])
     if not subject:raise RuntimeError("INFINEX_BEFORE_AFTER_UNKNOWN_SERVICE")
     # Disclaimer must be visible inside both images AND the caption.
+    article="una" if m["topic"] in ("puertas","escaleras") else "un"
+    before_line=("1️⃣ ANTES: una puerta antigua de madera, desgastada por el tiempo.\n"
+                 if m.get("scene_key")=="pexels:37164155" else
+                 "1️⃣ ANTES: el acceso sin el elemento metálico.\n")
     text=(
         "INFINEX | ANTES Y DESPUÉS · "+DATE+"\n\n"
-        "¿Y si este espacio cambiara por completo con un "+subject+"? 🟠\n\n"
-        "1️⃣ ANTES: el acceso sin el elemento metálico.\n"
+        "¿Y si este espacio cambiara por completo con "+article+" "+subject+"? 🟠\n\n"
+        +before_line+
         "2️⃣ DESPUÉS: cómo podría quedar con una solución diseñada a medida.\n\n"
         "Cada proyecto exige estudiar medidas, materiales, anclajes y acabados. "
         "Si tienes una entrada o una zona por transformar, escríbenos y "

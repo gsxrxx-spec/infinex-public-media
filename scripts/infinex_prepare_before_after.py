@@ -118,7 +118,7 @@ def slide(scene,mode,plan,out):
     size=56
     while d.textbbox((0,0),title,font=font(size))[2]>W-135:size-=2
     d.text((60,1040),title,font=font(size),fill=(247,249,250))
-    detail=("El mismo espacio, sin instalar la puerta."
+    detail=(plan.get("before_detail","El mismo espacio, sin instalar la puerta.")
             if mode=="before" else plan["after_detail"])
     s=32
     while d.textbbox((0,0),detail,font=font(s,False))[2]>W-120:s-=1

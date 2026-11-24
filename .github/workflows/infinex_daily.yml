@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/infinex_daily.yml'
       - 'scripts/infinex_daily.py'
+      - 'ops/infinex_clock_ping.json'
       - 'scripts/infinex_carousel_quality.py'
       - 'scripts/infinex_autorepair.py'
       - 'scripts/infinex_before_after.py'
@@ -73,7 +74,7 @@ jobs:
     env:
       INFINEX_IG_TOKEN: ${{ secrets.INFINEX_IG_TOKEN }}
       INFINEX_FB_PAGE_TOKEN: ${{ secrets.INFINEX_FB_PAGE_TOKEN }}
-      MODE: ${{ github.event_name == 'schedule' && github.event.schedule == '0 17 21 11 *' && 'publish' || github.event_name == 'workflow_dispatch' && inputs.mode || github.event_name == 'push' && 'dry_run' || 'recover' }}
+      MODE: ${{ github.event_name == 'schedule' && github.event.schedule == '0 17 21 11 *' && 'publish' || github.event_name == 'workflow_dispatch' && inputs.mode || github.event_name == 'push' && startsWith(github.event.head_commit.message, 'INFINEX CLOCK LIVE ') && 'recover' || github.event_name == 'push' && 'dry_run' || 'recover' }}
       INFINEX_SLOT: ${{ github.event_name == 'schedule' && github.event.schedule == '0 17 21 11 *' && '17' || github.event_name == 'workflow_dispatch' && inputs.slot || '09' }}
     steps:
       - name: Obtener repositorio
@@ -94,7 +95,7 @@ jobs:
         run: python tests/test_infinex_editorial_policy.py
       - name: Prohibir imágenes reutilizadas y titulares repetidos
         run: python tests/test_infinex_carousel_originality.py
-      - name: Comprobar plan de 14 publicaciones y no repetir Reels
+      - name: Comprobar calendario 7 publicaciones y no repetir Reels
         run: python tests/test_infinex_morning_reels.py
       - name: Validar autorreparación de fotos, textos y temas sin repetir
         run: python tests/test_infinex_autorepair.py

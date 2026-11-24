@@ -31,31 +31,31 @@ used=json.loads((base/"assets/before_after/USED_SCENES.json").read_text(encoding
 assert used["schema"]==1 and isinstance(used["used_sources"],list)
 scene_ids=set()
 for day in ("2026-11-22","2026-11-24","2026-11-26"):
-    files=list((base/"assets/before_after").glob(day+"_09_*/sources.json"))
-    assert len(files)==1,(day,files)
-    m=json.loads(files[0].read_text(encoding="utf-8"))
-    assert m["date"]==day and m["slot"]=="09" and m["time_local"]=="09:30"
-    assert m["type"]=="BEFORE_AFTER"
-    # Rejected Sunday post remains permanently spent; Tuesday/Thursday are
-    # quarantined until physical gate anchors and visual QA are repaired.
-    assert m["approved_for_publish"] is False
-    assert m.get("visual_fit_status") in (
-        "REJECTED_BY_USER_NEVER_REPOST",
-        "NEEDS_NEW_TWO_SUPPORT_SITE_AND_VISUAL_QA")
-    assert m["illustrative_simulation"] is True and m["not_actual_infinex_works"] is True
-    assert m["source_license"]=="https://www.pexels.com/license/"
-    assert len(m["images"])==2 and len(set(m["titles"]))==2
-    assert m["scene_key"] not in scene_ids
-    if m["scene_key"] in used["used_sources"]:
-        ledger=base/"records"/(day+"_09_before_after.json")
-        assert ledger.exists(),("USED_SCENE_WITH_NO_POST_OR_ATTEMPT_LEDGER",day)
-    scene_ids.add(m["scene_key"])
-    source=base/m["source_image"]
-    assert source.is_file() and hashlib.sha256(source.read_bytes()).hexdigest()==m["source_sha256"]
-    assert len({x["sha256"] for x in m["images"]})==2
-    for x in m["images"]:
-        f=base/x["path"]
-        assert f.is_file() and hashlib.sha256(f.read_bytes()).hexdigest()==x["sha256"]
+    candidate_files=list((base/"assets/before_after").glob(day+"_09_*/sources.json"))
+    assert candidate_files
+    manifests=[json.loads(f.read_text(encoding="utf-8-sig")) for f in candidate_files]
+    approved=[m for m in manifests if m.get("approved_for_publish")]
+    if day=="2026-11-24":
+        assert len(approved)==1 and approved[0]["scene_key"]=="pexels:37164155"
+        assert len(candidate_files)==2
+    else:
+        assert not approved
+    for m in manifests:
+        assert m["date"]==day and m["slot"]=="09" and m["time_local"]=="09:30"
+        assert m["type"]=="BEFORE_AFTER"
+        assert m["illustrative_simulation"] and m["not_actual_infinex_works"]
+        assert m["source_license"]=="https://www.pexels.com/license/"
+        assert len(m["images"])==2 and len(set(m["titles"]))==2
+        assert m["scene_key"] not in scene_ids
+        scene_ids.add(m["scene_key"])
+        source=base/m["source_image"]
+        assert source.is_file() and hashlib.sha256(source.read_bytes()).hexdigest()==m["source_sha256"]
+        assert len({x["sha256"] for x in m["images"]})==2
+        for entry in m["images"]:
+            img=base/entry["path"]
+            assert img.is_file() and hashlib.sha256(img.read_bytes()).hexdigest()==entry["sha256"]
+        if m["scene_key"] in used["used_sources"]:
+            assert (base/"records"/(day+"_09_before_after.json")).exists()
 print("INFINEX_THREE_DISTINCT_SIMULATED_BEFORE_AFTER_SOURCE_PAIRS_OK")
 
 video_manifest=[]
