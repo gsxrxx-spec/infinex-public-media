@@ -74,11 +74,17 @@ for index in range(7):
     elif kind == "before_after":
         sources=list((SCRIPTS.parent/"assets/before_after").glob(
             daily.DATE.isoformat()+"_09_*/sources.json"))
-        assert len(sources)==1
-        theme=json.loads(sources[0].read_text(encoding="utf-8"))["topic"]
+        approved=[json.loads(f.read_text(encoding="utf-8-sig"))
+                  for f in sources]
+        approved=[m for m in approved if m.get("approved_for_publish")]
+        assert len(approved)<=1, ("MULTIPLE_APPROVED_SCENES",daily.DATE)
+        # An unapproved future concept must not masquerade as a guaranteed
+        # scheduled topic; the real publisher will require a valid replacement.
+        theme=approved[0]["topic"] if approved else None
     else:
         theme=daily.topic_for_slot()
-    assert theme != previous, (daily.DATE,previous,theme)
+    if theme is not None and previous is not None:
+        assert theme != previous, (daily.DATE,previous,theme)
     previous=theme
 assert set(daily.SLIDE_DETAILS) == set(TOPICS)
 for theme, slides in daily.SLIDE_DETAILS.items():

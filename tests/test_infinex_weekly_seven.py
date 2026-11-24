@@ -60,7 +60,7 @@ print("INFINEX_THREE_DISTINCT_SIMULATED_BEFORE_AFTER_SOURCE_PAIRS_OK")
 
 video_manifest=[]
 for day,topic in (("2026-11-20","escaleras"),("2026-11-21","puertas"),
-                  ("2026-11-25","puertas"),("2026-11-28","cerramientos")):
+                  ("2026-11-25","cerramientos"),("2026-11-28","puertas")):
     p=base/"assets/reels"/(day+"_09_"+topic)/"sources.json"
     m=json.loads(p.read_text(encoding="utf-8"))
     assert m["date"]==day and m["slot"]=="09" and m["topic"]==topic
@@ -72,6 +72,8 @@ for day,topic in (("2026-11-20","escaleras"),("2026-11-21","puertas"),
 assert len(set(m["video_sha256"] for m in video_manifest))==4
 assert len(set(m["source_video_sha256"] for m in video_manifest))==4
 for path in (base/"assets/reels/2026-11-23_09_puertas/sources.json",
-             base/"assets/reels/2026-11-26_17_cerramientos/sources.json"):
+             base/"assets/reels/2026-11-26_17_cerramientos/sources.json",
+             base/"assets/reels/2026-11-25_09_puertas/sources.json",
+             base/"assets/reels/2026-11-28_09_cerramientos/sources.json"):
     assert json.loads(path.read_text(encoding="utf-8"))["approved_for_publish"] is False
 print("INFINEX_REELS_RESCHEDULED_25_28_NEVER_REUSED_OK")
