@@ -1,8 +1,7 @@
 {
-    "day":  "2026-11-24",
-    "kind":  "before_after",
-    "purpose":  "retry_after_fixing_historical_editorial_test_and_fresh_reel_topic_rotations",
-    "requested_by":  "owner",
-    "not_old_rejected_post":  true,
-    "fired_local":  "2026-11-24T17:22:00"
+    "day":  "2026-11-25",
+    "kind":  "reel",
+    "purpose":  "INFINEX CLOUD CLOCK RECONCILE AND PUBLISH ONLY APPROVED UNIQUE MEDIA",
+    "fired_local":  "2026-11-25T09:30:02",
+    "attempt":  "093002"
 }
