@@ -45,9 +45,9 @@
   ],
   "topic": "escaleras",
   "fallback_from": "before_after",
-  "fallback_approved": true,
+  "fallback_approved": false,
   "visual_review": {
-    "status": "APPROVED_BY_SYSTEM_VISUAL_REVIEW",
+    "status": "REJECTED_BY_USER",
     "reason": "Three inspected final photographs: actual staircase with metal railing, steel stairs and railings, modern metal balustrades; no fabricated installation, vehicle or overlay. Three distinct headlines, clear brand and illustrative attribution.",
     "sha256": [
       "a62ad3a7eefd84498c81f56d68d947485ff93ac8475707c58e9a02de8f12fa1d",
@@ -55,5 +55,6 @@
       "2593ee51b4208cd088cd56c27bbf3da23ebf1cfa19f0b01711b53834c267bad5"
     ],
     "date": "2026-11-26"
-  }
+  },
+  "do_not_republish": true
 }
