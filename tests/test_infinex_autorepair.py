@@ -23,7 +23,7 @@ assert not(set(map(norm,replacement)) & set(map(norm,used)))
 print("AUTOREPAIR_NEW_DISTINCT_COPY_OK")
 
 orig=(daily.prepare_editorial_plan,daily.build,daily.caption_for,
-      daily.review_before_publish,daily.EDITORIAL_THEME)
+      daily.review_before_publish,daily.EDITORIAL_THEME,daily.approved_fallback)
 attempts=[]
 try:
     def prepare(previous,failed):
@@ -35,6 +35,8 @@ try:
         attempts.append(("build",theme))
         if theme=="puertas":raise RuntimeError("EDITORIAL_SOURCE_PHOTO_REJECTED")
         return [("gates",{"id":"demo_1"})],{"titles":["ABC","XYZ","CTA"]}
+    # Isolate generic autorepair from a real approved date-specific fallback.
+    daily.approved_fallback=lambda day:None
     daily.prepare_editorial_plan=prepare
     daily.build=build
     daily.caption_for=lambda selected:"UNIQUE_PROMOTIONAL_TEXT"
@@ -46,7 +48,7 @@ try:
     print("AUTOREPAIR_REJECTED_TOPIC_REPLACED_BEFORE_PUBLISH_OK")
 finally:
     (daily.prepare_editorial_plan,daily.build,daily.caption_for,
-     daily.review_before_publish,daily.EDITORIAL_THEME)=orig
+     daily.review_before_publish,daily.EDITORIAL_THEME,daily.approved_fallback)=orig
 
 # A broken original photograph must be replaceable with a different licensed
 # source without changing the carousel's required three different headlines.

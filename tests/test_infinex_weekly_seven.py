@@ -5,7 +5,7 @@ import json,hashlib,sys
 from pathlib import Path
 from datetime import date,timedelta,datetime
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"scripts"))
-from infinex_weekly_plan import scheduled_posts,is_scheduled,due,review_due,CHANGE_DATE
+from infinex_weekly_plan import scheduled_posts,is_scheduled,due,review_due,CHANGE_DATE,WEEKLY_PLAN,approved_fallback
 from zoneinfo import ZoneInfo
 
 base=Path(__file__).resolve().parents[1]
@@ -13,7 +13,7 @@ expected={0:"informative",1:"before_after",2:"reel",3:"before_after",
           4:"informative",5:"reel",6:"before_after"}
 madrid=ZoneInfo("Europe/Madrid")
 first=date(2026,11,23)
-week=[(first+timedelta(days=i),scheduled_posts(first+timedelta(days=i))) for i in range(7)]
+week=[(first+timedelta(days=i),WEEKLY_PLAN[(first+timedelta(days=i)).weekday()]) for i in range(7)]
 assert all(len(posts)==1 and posts[0]==("09",expected[day.weekday()]) for day,posts in week)
 assert sum(posts[0][1]=="informative" for _,posts in week)==2
 assert sum(posts[0][1]=="before_after" for _,posts in week)==3
@@ -25,7 +25,14 @@ assert not due(date(2026,11,22),"09","before_after",datetime(2026,11,22,9,29,tzi
 assert due(date(2026,11,22),"09","before_after",datetime(2026,11,22,9,30,tzinfo=madrid))
 assert not review_due(date(2026,11,22),"09","before_after",datetime(2026,11,22,9,44,tzinfo=madrid))
 assert review_due(date(2026,11,22),"09","before_after",datetime(2026,11,22,9,45,tzinfo=madrid))
-print("INFINEX_7_DAILY_0930_0945_2REEL_3BEFOREAFTER_2INFO_OK")
+for day,_ in week:
+    fallback=approved_fallback(day)
+    if fallback:
+        assert scheduled_posts(day)==(("09","informative"),)
+        assert not is_scheduled(day,"09",expected[day.weekday()])
+        assert fallback["visual_review"]["sha256"]==[x["sha256"] for x in fallback["images"]]
+    else:assert scheduled_posts(day)==WEEKLY_PLAN[day.weekday()]
+print("INFINEX_7_DAILY_0930_0945_BASE_PLAN_AND_APPROVED_FALLBACK_OK")
 
 used=json.loads((base/"assets/before_after/USED_SCENES.json").read_text(encoding="utf-8"))
 assert used["schema"]==1 and isinstance(used["used_sources"],list)

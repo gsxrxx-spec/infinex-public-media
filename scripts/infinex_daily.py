@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from infinex_editorial_policy import TOPICS, assert_not_consecutive, topic_from_caption
 from infinex_autorepair import alternate_topics, unique_headlines
-from infinex_weekly_plan import START_DATE,CHANGE_DATE,is_scheduled,due,review_due,publish_hour_minute
+from infinex_weekly_plan import START_DATE,CHANGE_DATE,is_scheduled,due,review_due,publish_hour_minute,approved_fallback
 from infinex_carousel_quality import (REGISTRY,headings_for,validate_headings,
     used_photos,ensure_unique,reserve,confirmed_reserved,
     file_image_signature,hamming)
@@ -128,6 +128,8 @@ SLIDE_DETAILS = {
 def topic_for_slot():
     if EDITORIAL_THEME is not None:
         return EDITORIAL_THEME
+    fallback=approved_fallback(DATE)
+    if fallback:return fallback["topic"]
     # Distinct information services: Mondays stairs, Fridays professional welding.
     if DATE>=CHANGE_DATE and DATE.weekday()==0:
         return "escaleras"
@@ -474,12 +476,37 @@ def previous_instagram_topic():
         raise RuntimeError("INFINEX_PREVIOUS_POST_TOPIC_NEEDS_REVIEW")
     return result
 
+def load_approved_fallback(previous_topic=None):
+    global EDITORIAL_THEME,EDITORIAL_TITLES
+    m=approved_fallback(DATE)
+    if not m:return None
+    EDITORIAL_THEME=m["topic"]
+    EDITORIAL_TITLES=tuple(m["titles"])
+    if EDITORIAL_THEME==previous_topic:raise RuntimeError("INFINEX_FALLBACK_CONSECUTIVE_TOPIC")
+    hashes=[x["sha256"] for x in m["images"]]
+    if m["visual_review"].get("sha256")!=hashes or not m["visual_review"].get("reason"):
+        raise RuntimeError("INFINEX_FALLBACK_FINAL_VISUAL_REVIEW_MISSING")
+    scenes=json.loads((BASE/"assets/before_after/USED_SCENES.json").read_text(encoding="utf-8"))
+    blocked={x.split(":")[-1] for x in scenes["used_sources"]}
+    # Rejected drafts are also excluded from fallback.
+    for p in (BASE/"assets/before_after").glob("*/sources.json"):
+        item=json.loads(p.read_text(encoding="utf-8-sig"))
+        if item.get("scene_key"):blocked.add(item["scene_key"].split(":")[-1])
+    if blocked.intersection(str(x["id"]) for x in m["sources"]):
+        raise RuntimeError("INFINEX_FALLBACK_SCENE_REUSED")
+    chosen=[(x["category"],x) for x in m["sources"]]
+    cap=caption_for(chosen)
+    review_before_publish(chosen,m,cap)
+    return chosen,m,cap
+
 def regenerate_until_approved(previous_topic=None):
     """Replace unsuitable photographs, claims, titles or even the subject.
 
     This routine never disables originality/legal/brand checks. A true lack
     of usable stock or broken Meta access remains a technical error.
     """
+    fallback=load_approved_fallback(previous_topic)
+    if fallback:return fallback
     failed=set()
     for _ in range(len(TOPICS)):
         try:
@@ -528,6 +555,16 @@ def publish():
         log("INFINEX_CAROUSEL_NOT_YET_DUE",DAY_KEY,SLOT)
         return
     preflight()
+    fallback=approved_fallback(DATE)
+    if fallback:
+        # The entire local date is exclusive across all formats, not just caption.
+        recent=api(IG_ID+"/media?fields=id,caption,media_type,permalink,timestamp&limit=100").get("data")
+        if not isinstance(recent,list):raise RuntimeError("INFINEX_FALLBACK_META_READ_UNAVAILABLE")
+        for item in recent:
+            stamp=item.get("timestamp")
+            if not stamp:raise RuntimeError("INFINEX_FALLBACK_META_TIMESTAMP_MISSING")
+            if datetime.fromisoformat(stamp.replace("Z","+00:00")).astimezone(TZ).date()==DATE:
+                if not RECORD_FILE.exists():raise RuntimeError("INFINEX_FALLBACK_DATE_ALREADY_HAS_MEDIA_RECONCILE")
     # Do not require new stock to verify/reconcile an already-published slot.
     previous=(json.loads(RECORD_FILE.read_text(encoding="utf-8"))
               if RECORD_FILE.exists() else None)
@@ -580,6 +617,7 @@ def publish():
             raise RuntimeError("UNCONFIRMED_META_PUBLISH_NO_AUTOMATIC_RETRY")
         log("RESUMING_SAFE_PRE_PUBLISH_FAILURE",DAY_KEY,SLOT)
     if previous:
+        if fallback:raise RuntimeError("INFINEX_FALLBACK_EXISTING_RECORD_REQUIRES_RECONCILIATION")
         chosen,manifest=build()
         review_before_publish(chosen,manifest,expected_caption)
     # Reserve each source and every headline permanently before any Meta upload.

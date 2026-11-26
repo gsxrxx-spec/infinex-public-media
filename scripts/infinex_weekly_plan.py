@@ -7,6 +7,8 @@ Vigente desde el domingo 22/11/2026: 2 Reels, 3 antes/despues,
 from __future__ import annotations
 from datetime import date,datetime,time as dtime
 from zoneinfo import ZoneInfo
+from pathlib import Path
+import json
 TZ=ZoneInfo("Europe/Madrid")
 START_DATE=date(2026,11,21)
 CHANGE_DATE=date(2026,11,22)
@@ -22,8 +24,28 @@ WEEKLY_PLAN={
 }
 # Preserve the current Saturday's previously authorized two slots.
 TRANSITION={date(2026,11,21):(("09","reel"),("17","carousel"))}
+BASE=Path(__file__).resolve().parents[1]
+def approved_fallback(day:date):
+    if day<CHANGE_DATE:return None
+    original=WEEKLY_PLAN[day.weekday()][0][1]
+    if original=="informative":return None
+    p=BASE/"assets"/"daily"/day.isoformat()/"09"/"sources.json"
+    if not p.is_file():return None
+    m=json.loads(p.read_text(encoding="utf-8"))
+    if m.get("fallback_approved") is not True:return None
+    if (m.get("date")!=day.isoformat() or m.get("slot")!="09" or
+        m.get("fallback_from")!=original or
+        m.get("visual_review",{}).get("status")!="APPROVED_BY_SYSTEM_VISUAL_REVIEW"):
+        raise RuntimeError("INFINEX_FALLBACK_MANIFEST_INVALID")
+    # Never replace a slot which already has another format's public attempt.
+    for suffix in ("_09_before_after.json","_09_reel.json"):
+        if (BASE/"records"/(day.isoformat()+suffix)).is_file():
+            raise RuntimeError("INFINEX_FALLBACK_OTHER_FORMAT_RECORD_REQUIRES_RECONCILIATION")
+    return m
 def scheduled_posts(day:date)->tuple[tuple[str,str],...]:
-    if day>=CHANGE_DATE:return WEEKLY_PLAN[day.weekday()]
+    if day>=CHANGE_DATE:
+        if approved_fallback(day):return (("09","informative"),)
+        return WEEKLY_PLAN[day.weekday()]
     return TRANSITION.get(day,())
 def scheduled_post(day:date):
     items=scheduled_posts(day)
