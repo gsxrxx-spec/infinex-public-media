@@ -203,6 +203,30 @@
         "PIDE TU PROPUESTA"
       ],
       "status": "RESERVED_NO_REUSE"
+    },
+    {
+      "key": "2026-11-26_09",
+      "source_ids": [
+        "6127375",
+        "23964498",
+        "13565214"
+      ],
+      "image_sha256": [
+        "a62ad3a7eefd84498c81f56d68d947485ff93ac8475707c58e9a02de8f12fa1d",
+        "f2386e7d41761c7b88b4387f8ae9aad69dd7a2e1a660cc6e17e402fa3f799f04",
+        "2593ee51b4208cd088cd56c27bbf3da23ebf1cfa19f0b01711b53834c267bad5"
+      ],
+      "hero_dhash": [
+        "5b2d2627129392c8",
+        "5eccc8c8cd3d3b8d",
+        "662e2cf23a3a3839"
+      ],
+      "titles": [
+        "DISEÑA TU ESCALERA A MEDIDA",
+        "DETALLES QUE MARCAN LA DIFERENCIA",
+        "HABLEMOS DE TU PROYECTO"
+      ],
+      "status": "RESERVED_NO_REUSE"
     }
   ]
 }
