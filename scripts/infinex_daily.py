@@ -563,6 +563,9 @@ def publish():
         for item in recent:
             stamp=item.get("timestamp")
             if not stamp:raise RuntimeError("INFINEX_FALLBACK_META_TIMESTAMP_MISSING")
+            # Graph uses +0000, while Python 3.10 requires +00:00 for fromisoformat.
+            if len(stamp)>=5 and stamp[-5] in "+-" and stamp[-4:].isdigit():
+                stamp=stamp[:-2]+":"+stamp[-2:]
             if datetime.fromisoformat(stamp.replace("Z","+00:00")).astimezone(TZ).date()==DATE:
                 if not RECORD_FILE.exists():raise RuntimeError("INFINEX_FALLBACK_DATE_ALREADY_HAS_MEDIA_RECONCILE")
     # Do not require new stock to verify/reconcile an already-published slot.
