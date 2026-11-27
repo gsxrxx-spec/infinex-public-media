@@ -227,6 +227,30 @@
         "HABLEMOS DE TU PROYECTO"
       ],
       "status": "RESERVED_NO_REUSE"
+    },
+    {
+      "key": "2026-11-27_09",
+      "source_ids": [
+        "15581383",
+        "28354581",
+        "12210675"
+      ],
+      "image_sha256": [
+        "714e43d148b7d8cfd955e980f66fd8f3ebb1b46263f551bfe53df622683afb55",
+        "4695b69f5fc1397292a00e4856d51b79cc703d6c312a97e61b63710c6647617a",
+        "08d060a601c298e022eac1fc78c1720137f9cd74e93305575b95bb1141992221"
+      ],
+      "hero_dhash": [
+        "6743478f8f9f1f3f",
+        "0945383910396c43",
+        "587c6c6c74646ce6"
+      ],
+      "titles": [
+        "ESCALERAS QUE INSPIRAN",
+        "APROVECHA CADA HUECO",
+        "DISEÑEMOS TU ESCALERA"
+      ],
+      "status": "RESERVED_NO_REUSE"
     }
   ]
 }

@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-27",
+  "slot": "09",
+  "destination": "infinex_2025",
+  "license": "https://www.pexels.com/license/",
+  "not_actual_infinex_works": true,
+  "titles": [
+    "ESCALERAS QUE INSPIRAN",
+    "APROVECHA CADA HUECO",
+    "DISEÑEMOS TU ESCALERA"
+  ],
+  "sources": [
+    {
+      "id": "15581383",
+      "category": "structures",
+      "page": "https://www.pexels.com/photo/modern-staircase-interior-15581383/",
+      "author": "Jakob Jin"
+    },
+    {
+      "id": "28354581",
+      "category": "structures",
+      "page": "https://www.pexels.com/photo/a-close-up-of-a-set-of-stairs-with-metal-bars-28354581/",
+      "author": "Pexels"
+    },
+    {
+      "id": "12210675",
+      "category": "structures",
+      "page": "https://www.pexels.com/photo/staircase-in-a-city-from-a-top-perspective-12210675/",
+      "author": "Pexels"
+    }
+  ],
+  "images": [
+    {
+      "path": "assets/daily/2026-11-27/09/01.jpg",
+      "sha256": "714e43d148b7d8cfd955e980f66fd8f3ebb1b46263f551bfe53df622683afb55"
+    },
+    {
+      "path": "assets/daily/2026-11-27/09/02.jpg",
+      "sha256": "4695b69f5fc1397292a00e4856d51b79cc703d6c312a97e61b63710c6647617a"
+    },
+    {
+      "path": "assets/daily/2026-11-27/09/03.jpg",
+      "sha256": "08d060a601c298e022eac1fc78c1720137f9cd74e93305575b95bb1141992221"
+    }
+  ]
+}
