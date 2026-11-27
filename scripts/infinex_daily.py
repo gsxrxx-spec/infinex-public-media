@@ -499,6 +499,54 @@ def load_approved_fallback(previous_topic=None):
     review_before_publish(chosen,m,cap)
     return chosen,m,cap
 
+VISUAL_POLICY_FROM=date(2026,11,27)
+VISUAL_POLICY_VERSION="INFINEX_PRODUCT_VISUAL_V2_20261127"
+def require_product_visual_review(manifest):
+    review=manifest.get("visual_review",{})
+    if (review.get("status")!="APPROVED_BY_SYSTEM_VISUAL_REVIEW" or
+        review.get("policy_version")!=VISUAL_POLICY_VERSION or
+        review.get("sha256")!=[x["sha256"] for x in manifest["images"]] or
+        review.get("topic")!=manifest.get("topic") or
+        review.get("logo_sha256")!=LOGO_SHA256):
+        raise RuntimeError("INFINEX_PRODUCT_VISUAL_APPROVAL_REQUIRED")
+    slides=review.get("slides",[])
+    if len(slides)!=3:raise RuntimeError("INFINEX_THREE_VISUAL_REVIEWS_REQUIRED")
+    for item,slide in zip(manifest["images"],slides):
+        if (slide.get("sha256")!=item["sha256"] or
+            slide.get("decision")!="APPROVED" or
+            slide.get("metal_product_is_main_subject") is not True or
+            slide.get("matches_exact_service") is not True or
+            slide.get("finished_attractive_realistic") is not True or
+            slide.get("no_unrelated_or_deteriorated_scene") is not True or
+            not str(slide.get("visible_product_reason","")).strip()):
+            raise RuntimeError("INFINEX_SLIDE_PRODUCT_REVIEW_INVALID")
+        if manifest["topic"]=="escaleras" and slide.get("metal_structure_and_treads") is not True:
+            raise RuntimeError("INFINEX_STAIRS_MUST_BE_FULLY_METALLIC")
+    return True
+
+def load_reviewed_daily(previous_topic=None):
+    global EDITORIAL_THEME,EDITORIAL_TITLES
+    p=MEDIA_DIR/"sources.json"
+    if not p.is_file():raise RuntimeError("INFINEX_APPROVED_DAILY_ASSET_MISSING_PREPARE_ALTERNATIVE")
+    m=json.loads(p.read_text(encoding="utf-8"))
+    if (m.get("date")!=DAY_KEY or m.get("slot")!=SLOT or
+        m.get("topic") not in TOPICS or m.get("approved_for_publish") is not True):
+        raise RuntimeError("INFINEX_APPROVED_DAILY_MANIFEST_REQUIRED")
+    require_product_visual_review(m)
+    EDITORIAL_THEME=m["topic"];EDITORIAL_TITLES=tuple(m["titles"])
+    if EDITORIAL_THEME==previous_topic:raise RuntimeError("INFINEX_APPROVED_DAILY_CONSECUTIVE_TOPIC")
+    scenes=json.loads((BASE/"assets/before_after/USED_SCENES.json").read_text(encoding="utf-8"))
+    blocked={x.split(":")[-1] for x in scenes["used_sources"]}
+    for f in (BASE/"assets/before_after").glob("*/sources.json"):
+        item=json.loads(f.read_text(encoding="utf-8-sig"))
+        if item.get("scene_key"):blocked.add(item["scene_key"].split(":")[-1])
+    if blocked.intersection(str(x["id"]) for x in m["sources"]):
+        raise RuntimeError("INFINEX_APPROVED_DAILY_SCENE_REUSED")
+    chosen=[(x["category"],x) for x in m["sources"]]
+    caption=caption_for(chosen)
+    review_before_publish(chosen,m,caption)
+    return chosen,m,caption
+
 def regenerate_until_approved(previous_topic=None):
     """Replace unsuitable photographs, claims, titles or even the subject.
 
@@ -541,7 +589,13 @@ def dry_run():
         log('INFINEX_CAROUSEL_NOT_SCHEDULED',DAY_KEY,SLOT)
         return
     preflight()
-    chosen,manifest,caption=regenerate_until_approved(previous_instagram_topic())
+    if DATE>=VISUAL_POLICY_FROM:
+        if RECORD_FILE.exists():
+            log("DRY_RUN_EXISTING_RECORD_NO_REGENERATION",DAY_KEY,SLOT)
+            return
+        chosen,manifest,caption=load_reviewed_daily(previous_instagram_topic())
+    else:
+        chosen,manifest,caption=regenerate_until_approved(previous_instagram_topic())
     log("DRY_RUN_OK","date",DAY_KEY,"slot",SLOT,"images",len(manifest["images"]))
     log("SAFETY","NO_POST","NO_COMMIT","TOKEN_NOT_PRINTED")
     for source in manifest["sources"]:log("LICENSED_SOURCE",source["page"])
@@ -553,6 +607,9 @@ def publish():
         return
     if DATE>=START_DATE and not due(DATE,SLOT,"informative" if DATE>=CHANGE_DATE else "carousel",datetime.now(TZ)):
         log("INFINEX_CAROUSEL_NOT_YET_DUE",DAY_KEY,SLOT)
+        return
+    if TODAY>=VISUAL_POLICY_FROM and DATE<TODAY and not RECORD_FILE.exists():
+        log("INFINEX_NO_HISTORICAL_BACKFILL",DAY_KEY,SLOT)
         return
     preflight()
     fallback=approved_fallback(DATE)
@@ -594,7 +651,10 @@ def publish():
                    "INFINEX reconciled existing slot "+DAY_KEY+" "+SLOT)
             log("RECONCILED_EXISTING_SLOT",post["permalink"])
             return
-        chosen,manifest,expected_caption=regenerate_until_approved(previous_instagram_topic())
+        if DATE>=VISUAL_POLICY_FROM:
+            chosen,manifest,expected_caption=load_reviewed_daily(previous_instagram_topic())
+        else:
+            chosen,manifest,expected_caption=regenerate_until_approved(previous_instagram_topic())
     else:
         expected_caption=previous.get("caption") or caption_for([])
     # Reconcile from Instagram before any new publish, including after crashes.
@@ -620,9 +680,11 @@ def publish():
             raise RuntimeError("UNCONFIRMED_META_PUBLISH_NO_AUTOMATIC_RETRY")
         log("RESUMING_SAFE_PRE_PUBLISH_FAILURE",DAY_KEY,SLOT)
     if previous:
-        if fallback:raise RuntimeError("INFINEX_FALLBACK_EXISTING_RECORD_REQUIRES_RECONCILIATION")
+        if fallback or DATE>=VISUAL_POLICY_FROM:raise RuntimeError("INFINEX_REVIEWED_ASSET_EXISTING_RECORD_REQUIRES_RECONCILIATION")
         chosen,manifest=build()
         review_before_publish(chosen,manifest,expected_caption)
+    # No legacy automatic stock selection may reach the public send.
+    if DATE>=VISUAL_POLICY_FROM:require_product_visual_review(manifest)
     # Reserve each source and every headline permanently before any Meta upload.
     reserved=reserve(BASE,manifest,DAY_KEY,SLOT,MEDIA_DIR/"sources.json")
     state={"date":DAY_KEY,"slot":SLOT,"target":IG_USERNAME,"account_id":IG_ID,
